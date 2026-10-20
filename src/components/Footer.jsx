@@ -4,6 +4,8 @@ import { CONTACT_CONTENT } from '#constants'
 const NAV_ITEMS = [
   { label: 'About me', href: '#about-me' },
   { label: 'The process', href: '#theprocess' },
+  { label: 'Latest thumbnails', href: '#latest-thumbnails' },
+  { label: 'Client', href: '#client' },
   { label: 'FAQ', href: '#FAQ' },
   { label: "Let's talk!", href: '#contact' },
 ]
