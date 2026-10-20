@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { CheckCircle2, AlertCircle } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { CheckCircle2, AlertCircle, Globe, Search, ChevronDown } from 'lucide-react'
 import { CONTACT_CONTENT } from '#constants'
 
 // =========================================================================
@@ -30,20 +30,65 @@ const CONTACT_BLOCKS = {
   freelanceUrl: 'https://www.fiverr.com',
 }
 
-// Global timezones for client convenience
-const TIMEZONE_LIST = [
-  { id: 'indochina', label: 'Indochina Time', zone: 'Asia/Bangkok' },
-  { id: 'singapore', label: 'Singapore / HK', zone: 'Asia/Singapore' },
-  { id: 'tokyo', label: 'Tokyo / Seoul', zone: 'Asia/Tokyo' },
-  { id: 'india', label: 'India (IST)', zone: 'Asia/Kolkata' },
-  { id: 'dubai', label: 'Dubai (GST)', zone: 'Asia/Dubai' },
-  { id: 'london', label: 'London (GMT/BST)', zone: 'Europe/London' },
-  { id: 'berlin', label: 'Paris / Berlin (CET)', zone: 'Europe/Berlin' },
-  { id: 'ny', label: 'New York (ET)', zone: 'America/New_York' },
-  { id: 'chicago', label: 'Chicago (CT)', zone: 'America/Chicago' },
-  { id: 'la', label: 'Los Angeles (PT)', zone: 'America/Los_Angeles' },
-  { id: 'sydney', label: 'Sydney (AEST)', zone: 'Australia/Sydney' },
+// Comprehensive global timezone database grouped by continent / region (Calendly style)
+const TIMEZONE_DATA = [
+  // ASIA
+  { id: 'indochina', label: 'Indochina Time', zone: 'Asia/Bangkok', region: 'ASIA' },
+  { id: 'singapore', label: 'Singapore, Hong Kong', zone: 'Asia/Singapore', region: 'ASIA' },
+  { id: 'tokyo', label: 'Japan, Korea Time', zone: 'Asia/Tokyo', region: 'ASIA' },
+  { id: 'india', label: 'India Standard Time', zone: 'Asia/Kolkata', region: 'ASIA' },
+  { id: 'dubai', label: 'Gulf Standard Time', zone: 'Asia/Dubai', region: 'ASIA' },
+  { id: 'jordan', label: 'Jordan Time', zone: 'Asia/Amman', region: 'ASIA' },
+  { id: 'baku', label: 'Asia/Baku', zone: 'Asia/Baku', region: 'ASIA' },
+  { id: 'lebanon', label: 'Lebanon Time', zone: 'Asia/Beirut', region: 'ASIA' },
+  { id: 'philippines', label: 'Philippine Time', zone: 'Asia/Manila', region: 'ASIA' },
+  { id: 'pakistan', label: 'Pakistan Time', zone: 'Asia/Karachi', region: 'ASIA' },
+
+  // EUROPE
+  { id: 'london', label: 'UK / London (GMT/BST)', zone: 'Europe/London', region: 'EUROPE' },
+  { id: 'paris', label: 'Central European (CET)', zone: 'Europe/Paris', region: 'EUROPE' },
+  { id: 'amsterdam', label: 'Amsterdam Time', zone: 'Europe/Amsterdam', region: 'EUROPE' },
+  { id: 'athens', label: 'Eastern European (EET)', zone: 'Europe/Athens', region: 'EUROPE' },
+  { id: 'istanbul', label: 'Turkey Time', zone: 'Europe/Istanbul', region: 'EUROPE' },
+
+  // AFRICA
+  { id: 'cairo', label: 'Africa/Cairo', zone: 'Africa/Cairo', region: 'AFRICA' },
+  { id: 'baghdad_ea', label: 'Baghdad, East Africa Time', zone: 'Africa/Nairobi', region: 'AFRICA' },
+  { id: 'johannesburg', label: 'South Africa Standard', zone: 'Africa/Johannesburg', region: 'AFRICA' },
+  { id: 'lagos', label: 'West Africa Time', zone: 'Africa/Lagos', region: 'AFRICA' },
+  { id: 'casablanca', label: 'Morocco Time', zone: 'Africa/Casablanca', region: 'AFRICA' },
+
+  // AMERICAS
+  { id: 'ny', label: 'US Eastern Time (ET)', zone: 'America/New_York', region: 'AMERICAS' },
+  { id: 'chicago', label: 'US Central Time (CT)', zone: 'America/Chicago', region: 'AMERICAS' },
+  { id: 'denver', label: 'US Mountain Time (MT)', zone: 'America/Denver', region: 'AMERICAS' },
+  { id: 'la', label: 'US Pacific Time (PT)', zone: 'America/Los_Angeles', region: 'AMERICAS' },
+  { id: 'saopaulo', label: 'Brazil / São Paulo', zone: 'America/Sao_Paulo', region: 'AMERICAS' },
+
+  // ATLANTIC
+  { id: 'azores', label: 'Azores Time', zone: 'Atlantic/Azores', region: 'ATLANTIC' },
+  { id: 'capeverde', label: 'Cape Verde Time', zone: 'Atlantic/Cape_Verde', region: 'ATLANTIC' },
+
+  // OCEANIA
+  { id: 'sydney', label: 'Australian Eastern (AEST)', zone: 'Australia/Sydney', region: 'OCEANIA' },
+  { id: 'perth', label: 'Western Australia (AWST)', zone: 'Australia/Perth', region: 'OCEANIA' },
+  { id: 'auckland', label: 'New Zealand (NZST)', zone: 'Pacific/Auckland', region: 'OCEANIA' },
 ]
+
+const REGIONS = ['ASIA', 'EUROPE', 'AFRICA', 'AMERICAS', 'ATLANTIC', 'OCEANIA']
+
+const detectUserTz = () => {
+  try {
+    if (typeof window !== 'undefined' && Intl?.DateTimeFormat) {
+      const userZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+      const match = TIMEZONE_DATA.find((t) => t.zone === userZone)
+      if (match) return match
+    }
+  } catch {
+    // fallback
+  }
+  return TIMEZONE_DATA[0] // Indochina by default
+}
 
 export default function ContactSection() {
   // Form fields state
@@ -59,20 +104,13 @@ export default function ContactSection() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  // Timezone state
+  // Timezone state (Calendly white-bg modal style)
   const [currentTime, setCurrentTime] = useState(() => new Date())
-  const [selectedTz, setSelectedTz] = useState(() => {
-    try {
-      if (typeof window !== 'undefined' && Intl?.DateTimeFormat) {
-        const userZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-        const match = TIMEZONE_LIST.find((t) => t.zone === userZone)
-        if (match) return match
-      }
-    } catch {
-      // fallback
-    }
-    return TIMEZONE_LIST[0] // Indochina by default
-  })
+  const [is24h, setIs24h] = useState(false)
+  const [tzSearch, setTzSearch] = useState('')
+  const [isTzOpen, setIsTzOpen] = useState(false)
+  const [selectedTz, setSelectedTz] = useState(detectUserTz)
+  const tzDropdownRef = useRef(null)
 
   // Live second-by-second clock
   useEffect(() => {
@@ -80,14 +118,25 @@ export default function ContactSection() {
     return () => clearInterval(timer)
   }, [])
 
+  // Close timezone modal on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (tzDropdownRef.current && !tzDropdownRef.current.contains(e.target)) {
+        setIsTzOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   // Format time for any given timezone
   const formatTime = (zone) => {
     try {
       return new Intl.DateTimeFormat('en-US', {
         timeZone: zone,
-        hour: 'numeric',
+        hour: '2-digit',
         minute: '2-digit',
-        hour12: true,
+        hour12: !is24h,
       }).format(currentTime)
     } catch {
       return '--:--'
@@ -111,7 +160,7 @@ export default function ContactSection() {
           timeZone: targetZone,
           hour: 'numeric',
           minute: '2-digit',
-          hour12: true,
+          hour12: !is24h,
         }).format(d)
 
       return `${fmt(startUtc)} – ${fmt(endUtc)}`
@@ -189,6 +238,13 @@ export default function ContactSection() {
     setIsSubmitted(false)
     setErrorMessage('')
   }
+
+  // Filter timezones by search query
+  const filteredTimezones = TIMEZONE_DATA.filter((tz) =>
+    tz.label.toLowerCase().includes(tzSearch.toLowerCase()) ||
+    tz.region.toLowerCase().includes(tzSearch.toLowerCase()) ||
+    tz.zone.toLowerCase().includes(tzSearch.toLowerCase())
+  )
 
   // Clean title style matching reference photo (Image 2: Social Media, Title Case, not all-caps)
   const blockTitleStyle = {
@@ -297,7 +353,7 @@ export default function ContactSection() {
             }}
             className="contact-2x2-grid"
           >
-            {/* 1. AVAILABILITY */}
+            {/* 1. AVAILABILITY + CALENDLY WHITE-BG TIMEZONE SELECTOR */}
             <div>
               <span style={blockTitleStyle}>{CONTACT_BLOCKS.availabilityTitle}</span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '15px' }}>
@@ -306,35 +362,250 @@ export default function ContactSection() {
                   {CONTACT_BLOCKS.hours}
                 </span>
 
-                {/* Clean, Subtle Timezone Converter (No clunky box, no glitch) */}
-                <div style={{ marginTop: '4px' }}>
-                  <select
-                    value={selectedTz.id}
-                    onChange={(e) => {
-                      const match = TIMEZONE_LIST.find((t) => t.id === e.target.value)
-                      if (match) setSelectedTz(match)
-                    }}
+                {/* Calendly White-BG Timezone Selector Trigger */}
+                <div ref={tzDropdownRef} style={{ position: 'relative', marginTop: '6px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setIsTzOpen((prev) => !prev)}
                     style={{
-                      background: 'rgba(255, 255, 255, 0.06)',
-                      border: '1px solid rgba(255, 255, 255, 0.14)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '7px',
+                      padding: '6px 12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.07)',
+                      border: '1px solid rgba(255, 255, 255, 0.18)',
                       borderRadius: '8px',
-                      color: '#d1d5db',
+                      color: '#ffffff',
                       fontSize: '13px',
-                      padding: '5px 10px',
-                      outline: 'none',
+                      fontWeight: 600,
                       cursor: 'pointer',
                       fontFamily: "'Figtree', sans-serif",
+                      transition: 'all 0.18s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.12)'
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.28)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.07)'
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.18)'
                     }}
                   >
-                    {TIMEZONE_LIST.map((tz) => (
-                      <option key={tz.id} value={tz.id} style={{ backgroundColor: '#141414', color: '#ffffff' }}>
-                        {tz.label} ({formatTime(tz.zone)})
-                      </option>
-                    ))}
-                  </select>
-                  <div style={{ fontSize: '12px', color: '#60a5fa', marginTop: '6px', fontWeight: 500 }}>
+                    <Globe size={13} style={{ color: '#0260ef' }} />
+                    <span>
+                      {selectedTz.label} ({formatTime(selectedTz.zone)})
+                    </span>
+                    <ChevronDown
+                      size={13}
+                      style={{
+                        transform: isTzOpen ? 'rotate(180deg)' : 'none',
+                        transition: 'transform 0.18s ease',
+                        color: '#94a3b8',
+                      }}
+                    />
+                  </button>
+
+                  {/* Converted Hours Note (Requested: "keep this My 5–8 PM is ... in your time it helpful") */}
+                  <div style={{ marginTop: '8px', fontSize: '12.5px', color: '#60a5fa', fontWeight: 500, lineHeight: 1.4 }}>
                     My 5–8 PM is {getConvertedWorkingHours(selectedTz.zone)} in your time
                   </div>
+
+                  {/* Calendly White-BG Popup Modal (Exact layout from user screenshot) */}
+                  {isTzOpen && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 8px)',
+                        left: 0,
+                        width: '320px',
+                        maxWidth: '92vw',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '12px',
+                        padding: '14px',
+                        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
+                        zIndex: 1000,
+                        boxSizing: 'border-box',
+                        color: '#0f172a',
+                      }}
+                    >
+                      {/* Search Bar */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '8px 12px',
+                          backgroundColor: '#f8fafc',
+                          border: '1.5px solid #e2e8f0',
+                          borderRadius: '8px',
+                          marginBottom: '12px',
+                        }}
+                      >
+                        <Search size={14} style={{ color: '#64748b' }} />
+                        <input
+                          type="text"
+                          value={tzSearch}
+                          onChange={(e) => setTzSearch(e.target.value)}
+                          placeholder="Search..."
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            outline: 'none',
+                            color: '#0f172a',
+                            fontSize: '13px',
+                            width: '100%',
+                            fontFamily: "'Figtree', sans-serif",
+                          }}
+                        />
+                      </div>
+
+                      {/* Timezone Controls: AM/PM vs 24h Toggle */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          paddingBottom: '10px',
+                          marginBottom: '6px',
+                          borderBottom: '1px solid #f1f5f9',
+                        }}
+                      >
+                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569', letterSpacing: '0.8px' }}>
+                          TIME ZONE
+                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              color: !is24h ? '#0f172a' : '#94a3b8',
+                              fontWeight: !is24h ? 700 : 500,
+                            }}
+                          >
+                            am/pm
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setIs24h((prev) => !prev)}
+                            style={{
+                              width: '32px',
+                              height: '18px',
+                              backgroundColor: is24h ? '#0260ef' : '#cbd5e1',
+                              borderRadius: '20px',
+                              border: 'none',
+                              cursor: 'pointer',
+                              position: 'relative',
+                              padding: 0,
+                              transition: 'background-color 0.2s ease',
+                            }}
+                          >
+                            <span
+                              style={{
+                                position: 'absolute',
+                                top: '2px',
+                                left: is24h ? '16px' : '2px',
+                                width: '14px',
+                                height: '14px',
+                                backgroundColor: '#ffffff',
+                                borderRadius: '50%',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                                transition: 'left 0.2s ease',
+                              }}
+                            />
+                          </button>
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              color: is24h ? '#0f172a' : '#94a3b8',
+                              fontWeight: is24h ? 700 : 500,
+                            }}
+                          >
+                            24h
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Grouped Timezones List across ASIA, EUROPE, AFRICA, AMERICAS, ATLANTIC, OCEANIA */}
+                      <div
+                        style={{
+                          maxHeight: '220px',
+                          overflowY: 'auto',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '2px',
+                          paddingRight: '4px',
+                        }}
+                      >
+                        {REGIONS.map((region) => {
+                          const itemsInRegion = filteredTimezones.filter((tz) => tz.region === region)
+                          if (itemsInRegion.length === 0) return null
+
+                          return (
+                            <div key={region} style={{ marginBottom: '8px' }}>
+                              <div
+                                style={{
+                                  fontSize: '11px',
+                                  fontWeight: 800,
+                                  color: '#64748b',
+                                  letterSpacing: '1px',
+                                  padding: '6px 8px 3px 8px',
+                                }}
+                              >
+                                {region}
+                              </div>
+
+                              {itemsInRegion.map((tz) => {
+                                const isSelected = selectedTz.id === tz.id
+                                return (
+                                  <button
+                                    key={tz.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedTz(tz)
+                                      setIsTzOpen(false)
+                                    }}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      padding: '7px 8px',
+                                      borderRadius: '6px',
+                                      border: 'none',
+                                      backgroundColor: isSelected ? '#eff6ff' : 'transparent',
+                                      color: isSelected ? '#0260ef' : '#1e293b',
+                                      fontSize: '13px',
+                                      cursor: 'pointer',
+                                      textAlign: 'left',
+                                      width: '100%',
+                                      fontFamily: "'Figtree', sans-serif",
+                                      transition: 'background-color 0.15s ease',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      if (!isSelected) e.currentTarget.style.backgroundColor = '#f1f5f9'
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'
+                                    }}
+                                  >
+                                    <span style={{ fontWeight: isSelected ? 700 : 500 }}>{tz.label}</span>
+                                    <span
+                                      style={{
+                                        fontWeight: 600,
+                                        fontSize: '12px',
+                                        color: isSelected ? '#0260ef' : '#64748b',
+                                      }}
+                                    >
+                                      {formatTime(tz.zone)}
+                                    </span>
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
