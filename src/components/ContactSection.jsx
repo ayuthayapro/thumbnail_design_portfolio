@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
-import { CheckCircle2, AlertCircle, Globe, Search, ChevronDown } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { CheckCircle2, AlertCircle } from 'lucide-react'
 import { CONTACT_CONTENT } from '#constants'
 
 // =========================================================================
@@ -30,7 +30,7 @@ const CONTACT_BLOCKS = {
   freelanceUrl: 'https://www.fiverr.com',
 }
 
-// Comprehensive global timezone database grouped by continent / region (Calendly style)
+// Comprehensive global timezone database grouped by continent / region
 const TIMEZONE_DATA = [
   // ASIA
   { id: 'indochina', label: 'Indochina Time', zone: 'Asia/Bangkok', region: 'ASIA' },
@@ -104,13 +104,9 @@ export default function ContactSection() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  // Timezone state (Calendly white-bg modal style)
+  // Timezone state
   const [currentTime, setCurrentTime] = useState(() => new Date())
-  const [is24h, setIs24h] = useState(false)
-  const [tzSearch, setTzSearch] = useState('')
-  const [isTzOpen, setIsTzOpen] = useState(false)
   const [selectedTz, setSelectedTz] = useState(detectUserTz)
-  const tzDropdownRef = useRef(null)
 
   // Live second-by-second clock
   useEffect(() => {
@@ -118,25 +114,14 @@ export default function ContactSection() {
     return () => clearInterval(timer)
   }, [])
 
-  // Close timezone modal on click outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (tzDropdownRef.current && !tzDropdownRef.current.contains(e.target)) {
-        setIsTzOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
   // Format time for any given timezone
   const formatTime = (zone) => {
     try {
       return new Intl.DateTimeFormat('en-US', {
         timeZone: zone,
-        hour: '2-digit',
+        hour: 'numeric',
         minute: '2-digit',
-        hour12: !is24h,
+        hour12: true,
       }).format(currentTime)
     } catch {
       return '--:--'
@@ -160,7 +145,7 @@ export default function ContactSection() {
           timeZone: targetZone,
           hour: 'numeric',
           minute: '2-digit',
-          hour12: !is24h,
+          hour12: true,
         }).format(d)
 
       return `${fmt(startUtc)} – ${fmt(endUtc)}`
@@ -238,13 +223,6 @@ export default function ContactSection() {
     setIsSubmitted(false)
     setErrorMessage('')
   }
-
-  // Filter timezones by search query
-  const filteredTimezones = TIMEZONE_DATA.filter((tz) =>
-    tz.label.toLowerCase().includes(tzSearch.toLowerCase()) ||
-    tz.region.toLowerCase().includes(tzSearch.toLowerCase()) ||
-    tz.zone.toLowerCase().includes(tzSearch.toLowerCase())
-  )
 
   // Clean title style matching reference photo (Image 2: Social Media, Title Case, not all-caps)
   const blockTitleStyle = {
@@ -353,7 +331,7 @@ export default function ContactSection() {
             }}
             className="contact-2x2-grid"
           >
-            {/* 1. AVAILABILITY + CALENDLY WHITE-BG TIMEZONE SELECTOR */}
+            {/* 1. AVAILABILITY + CLEAN WHITE BG SELECTOR WITH FULL GLOBAL TIMEZONES */}
             <div>
               <span style={blockTitleStyle}>{CONTACT_BLOCKS.availabilityTitle}</span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '15px' }}>
@@ -362,250 +340,67 @@ export default function ContactSection() {
                   {CONTACT_BLOCKS.hours}
                 </span>
 
-                {/* Calendly White-BG Timezone Selector Trigger */}
-                <div ref={tzDropdownRef} style={{ position: 'relative', marginTop: '6px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setIsTzOpen((prev) => !prev)}
+                {/* White Background Global Timezone Dropdown */}
+                <div style={{ marginTop: '8px' }}>
+                  <select
+                    value={selectedTz.id}
+                    onChange={(e) => {
+                      const match = TIMEZONE_DATA.find((t) => t.id === e.target.value)
+                      if (match) setSelectedTz(match)
+                    }}
                     style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '7px',
-                      padding: '6px 12px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.07)',
-                      border: '1px solid rgba(255, 255, 255, 0.18)',
+                      backgroundColor: '#ffffff',
+                      color: '#0f172a',
+                      border: '1.5px solid #cbd5e1',
                       borderRadius: '8px',
-                      color: '#ffffff',
-                      fontSize: '13px',
+                      padding: '8px 14px',
+                      fontSize: '13.5px',
                       fontWeight: 600,
-                      cursor: 'pointer',
                       fontFamily: "'Figtree', sans-serif",
-                      transition: 'all 0.18s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.12)'
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.28)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.07)'
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.18)'
+                      outline: 'none',
+                      cursor: 'pointer',
+                      width: '100%',
+                      maxWidth: '300px',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.18)',
                     }}
                   >
-                    <Globe size={13} style={{ color: '#0260ef' }} />
-                    <span>
-                      {selectedTz.label} ({formatTime(selectedTz.zone)})
-                    </span>
-                    <ChevronDown
-                      size={13}
-                      style={{
-                        transform: isTzOpen ? 'rotate(180deg)' : 'none',
-                        transition: 'transform 0.18s ease',
-                        color: '#94a3b8',
-                      }}
-                    />
-                  </button>
+                    {REGIONS.map((region) => {
+                      const itemsInRegion = TIMEZONE_DATA.filter((tz) => tz.region === region)
+                      if (itemsInRegion.length === 0) return null
 
-                  {/* Converted Hours Note (Requested: "keep this My 5–8 PM is ... in your time it helpful") */}
+                      return (
+                        <optgroup
+                          key={region}
+                          label={region}
+                          style={{
+                            fontWeight: 800,
+                            color: '#475569',
+                            backgroundColor: '#f8fafc',
+                          }}
+                        >
+                          {itemsInRegion.map((tz) => (
+                            <option
+                              key={tz.id}
+                              value={tz.id}
+                              style={{
+                                color: '#0f172a',
+                                fontWeight: 500,
+                                backgroundColor: '#ffffff',
+                                padding: '4px',
+                              }}
+                            >
+                              {tz.label} ({formatTime(tz.zone)})
+                            </option>
+                          ))}
+                        </optgroup>
+                      )
+                    })}
+                  </select>
+
+                  {/* Helpful working hours note */}
                   <div style={{ marginTop: '8px', fontSize: '12.5px', color: '#60a5fa', fontWeight: 500, lineHeight: 1.4 }}>
                     My 5–8 PM is {getConvertedWorkingHours(selectedTz.zone)} in your time
                   </div>
-
-                  {/* Calendly White-BG Popup Modal (Exact layout from user screenshot) */}
-                  {isTzOpen && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: 'calc(100% + 8px)',
-                        left: 0,
-                        width: '320px',
-                        maxWidth: '92vw',
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '12px',
-                        padding: '14px',
-                        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
-                        zIndex: 1000,
-                        boxSizing: 'border-box',
-                        color: '#0f172a',
-                      }}
-                    >
-                      {/* Search Bar */}
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          padding: '8px 12px',
-                          backgroundColor: '#f8fafc',
-                          border: '1.5px solid #e2e8f0',
-                          borderRadius: '8px',
-                          marginBottom: '12px',
-                        }}
-                      >
-                        <Search size={14} style={{ color: '#64748b' }} />
-                        <input
-                          type="text"
-                          value={tzSearch}
-                          onChange={(e) => setTzSearch(e.target.value)}
-                          placeholder="Search..."
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            outline: 'none',
-                            color: '#0f172a',
-                            fontSize: '13px',
-                            width: '100%',
-                            fontFamily: "'Figtree', sans-serif",
-                          }}
-                        />
-                      </div>
-
-                      {/* Timezone Controls: AM/PM vs 24h Toggle */}
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          paddingBottom: '10px',
-                          marginBottom: '6px',
-                          borderBottom: '1px solid #f1f5f9',
-                        }}
-                      >
-                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569', letterSpacing: '0.8px' }}>
-                          TIME ZONE
-                        </span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span
-                            style={{
-                              fontSize: '11px',
-                              color: !is24h ? '#0f172a' : '#94a3b8',
-                              fontWeight: !is24h ? 700 : 500,
-                            }}
-                          >
-                            am/pm
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setIs24h((prev) => !prev)}
-                            style={{
-                              width: '32px',
-                              height: '18px',
-                              backgroundColor: is24h ? '#0260ef' : '#cbd5e1',
-                              borderRadius: '20px',
-                              border: 'none',
-                              cursor: 'pointer',
-                              position: 'relative',
-                              padding: 0,
-                              transition: 'background-color 0.2s ease',
-                            }}
-                          >
-                            <span
-                              style={{
-                                position: 'absolute',
-                                top: '2px',
-                                left: is24h ? '16px' : '2px',
-                                width: '14px',
-                                height: '14px',
-                                backgroundColor: '#ffffff',
-                                borderRadius: '50%',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                                transition: 'left 0.2s ease',
-                              }}
-                            />
-                          </button>
-                          <span
-                            style={{
-                              fontSize: '11px',
-                              color: is24h ? '#0f172a' : '#94a3b8',
-                              fontWeight: is24h ? 700 : 500,
-                            }}
-                          >
-                            24h
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Grouped Timezones List across ASIA, EUROPE, AFRICA, AMERICAS, ATLANTIC, OCEANIA */}
-                      <div
-                        style={{
-                          maxHeight: '220px',
-                          overflowY: 'auto',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '2px',
-                          paddingRight: '4px',
-                        }}
-                      >
-                        {REGIONS.map((region) => {
-                          const itemsInRegion = filteredTimezones.filter((tz) => tz.region === region)
-                          if (itemsInRegion.length === 0) return null
-
-                          return (
-                            <div key={region} style={{ marginBottom: '8px' }}>
-                              <div
-                                style={{
-                                  fontSize: '11px',
-                                  fontWeight: 800,
-                                  color: '#64748b',
-                                  letterSpacing: '1px',
-                                  padding: '6px 8px 3px 8px',
-                                }}
-                              >
-                                {region}
-                              </div>
-
-                              {itemsInRegion.map((tz) => {
-                                const isSelected = selectedTz.id === tz.id
-                                return (
-                                  <button
-                                    key={tz.id}
-                                    type="button"
-                                    onClick={() => {
-                                      setSelectedTz(tz)
-                                      setIsTzOpen(false)
-                                    }}
-                                    style={{
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'space-between',
-                                      padding: '7px 8px',
-                                      borderRadius: '6px',
-                                      border: 'none',
-                                      backgroundColor: isSelected ? '#eff6ff' : 'transparent',
-                                      color: isSelected ? '#0260ef' : '#1e293b',
-                                      fontSize: '13px',
-                                      cursor: 'pointer',
-                                      textAlign: 'left',
-                                      width: '100%',
-                                      fontFamily: "'Figtree', sans-serif",
-                                      transition: 'background-color 0.15s ease',
-                                    }}
-                                    onMouseEnter={(e) => {
-                                      if (!isSelected) e.currentTarget.style.backgroundColor = '#f1f5f9'
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'
-                                    }}
-                                  >
-                                    <span style={{ fontWeight: isSelected ? 700 : 500 }}>{tz.label}</span>
-                                    <span
-                                      style={{
-                                        fontWeight: 600,
-                                        fontSize: '12px',
-                                        color: isSelected ? '#0260ef' : '#64748b',
-                                      }}
-                                    >
-                                      {formatTime(tz.zone)}
-                                    </span>
-                                  </button>
-                                )
-                              })}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
