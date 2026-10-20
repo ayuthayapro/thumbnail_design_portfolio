@@ -1,0 +1,1193 @@
+@import "tailwindcss";
+
+@theme {
+  --font-figtree: 'Figtree', sans-serif;
+  --color-menno-blue: #0260ef;
+  --color-menno-blue-hover: #024fc5;
+  --color-menno-dark: #141414;
+  --color-menno-orange: #ff7a00;
+}
+
+@layer base {
+  html {
+    font-family: 'Figtree', sans-serif !important;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #141414;
+    font-family: 'Figtree', sans-serif !important;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button,
+  input,
+  select,
+  textarea,
+  h1, h2, h3, h4, h5, h6,
+  p, a, span, li, label {
+    font-family: 'Figtree', sans-serif !important;
+  }
+}
+
+/* ==========================================================================
+   HERO TOP TAGLINE: "PACKAGING STRATEGIST"
+   Edit text size, color, font-weight, and position below.
+   ========================================================================== */
+#hero-tagline,
+.elementor-1284 .elementor-element.elementor-element-8a28b64 .elementor-heading-title {
+  font-family: 'Figtree', sans-serif !important;
+  font-size: 22px !important;     /* <-- CHANGE TEXT SIZE HERE (e.g. 18px, 24px, 28px) */
+  font-weight: 900 !important;    /* <-- FONT WEIGHT (e.g. 700, 800, 900) */
+  letter-spacing: 1px !important; /* <-- LETTER SPACING */
+  color: #141414 !;      /* <-- TEXT COLOR HERE */
+
+  /* Position & Spacing Controls: */
+  margin-top: 0px !important;     /* Move DOWN (+) or UP (-) (e.g. 10px, -15px) */
+  margin-bottom: 0px !important;  /* Space between this tagline and the main title below */
+  margin-left: 0px !important;    /* Move RIGHT (+) or LEFT (-) (e.g. 10px, -10px) */
+  text-align: left !important;    /* Alignment: left | center | right */
+
+  /* Fine-tuning pixel nudge: */
+  position: relative !important;
+  top:30px !important;            /* Nudge UP (-) or DOWN (+) */
+  left: 0px !important;           /* Nudge LEFT (-) or RIGHT (+) */
+}
+
+/* ==========================================================================
+   HERO TITLE & CURSOR STYLING:
+   "Great video don't get views, Great thumbnail do"
+   Edit font-size, colors, link style, and cursor image size/position below.
+   ========================================================================== */
+
+/* 1. Main Headline Typography ("Great video don't get views, Great thumbnail do") */
+#hero-headline,
+.elementor-1284 .elementor-element.elementor-element-753a0afa .elementor-heading-title {
+  font-family: 'Figtree', sans-serif !important;
+  font-size: 89px !important; /* <-- CHANGE DESKTOP TEXT SIZE HERE */
+  font-weight: 900 !important; /* <-- CHANGE FONT WEIGHT HERE (e.g. 700, 800, 900) */
+  line-height: 1.05 !important;
+  color: #fafafa !important;
+
+  /* ==========================================================
+     POSITION CONTROLS (Move up, down, left, right):
+     ========================================================== */
+  margin-top: 10px !important;    /* Move DOWN (+) or UP (-) (e.g. -20px or 30px) */
+  margin-bottom: -25px !important; /* Space between this title and subtitle below */
+  margin-left: 0px !important;    /* Move RIGHT (+) or LEFT (-) */
+  text-align: left !important;    /* Text alignment: left | center | right */
+
+  /* Exact pixel nudge with top / left: */
+  position: relative !important;
+  top: 0px !important;    /* Nudge UP (-) or DOWN (+) (e.g. -10px, 15px) */
+  left: 0px !important;   /* Nudge LEFT (-) or RIGHT (+) (e.g. -10px, 15px) */
+}
+
+/* Tablet screen font size (screens under 1024px) */
+@media (max-width: 1024px) {
+  #hero-headline,
+  .elementor-1284 .elementor-element.elementor-element-753a0afa .elementor-heading-title {
+    font-size: 70px !important; /* <-- CHANGE TABLET SIZE HERE */
+  }
+}
+
+/* Mobile screen font size (screens under 767px) */
+@media (max-width: 767px) {
+  #hero-headline,
+  .elementor-1284 .elementor-element.elementor-element-753a0afa .elementor-heading-title {
+    font-size: 38px !important; /* <-- CHANGE MOBILE SIZE HERE */
+  }
+}
+
+/* 2. The "video" Link Styling */
+#fake-link {
+  color: inherit;
+  text-decoration: underline !important;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 3px;
+  cursor: pointer !important;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+#fake-link:hover {
+  color: #0260ef; /* Color when hovering on "video" */
+}
+
+/* 3. The Hover Cursor Image (click.png) */
+#cursor-image {
+  position: fixed;
+  display: none;
+  pointer-events: none;
+  z-index: 1000000 !important;
+  width: 90px; /* Adjust size here (e.g. 70px, 90px, 110px, 140px) */
+  height: auto;
+  transform: translate(-35%, -5%); /* Adjust position offset: translate(X, Y) */
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.15));
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+/* ==========================================================================
+   UNIVERSAL SPRING POP & RISE ANIMATION
+   Applied to all button boxes and text boxes across the website.
+   ========================================================================== */
+
+.spring-pop-box,
+.curious-btn-box {
+  display: inline-block;
+  opacity: 0;
+  /* 1. Starting position (before scrolling into view) */
+  transform: translateY(35px) scale(0.88); /* <-- 35px is rise distance, 0.88 is initial size */
+
+  /* 2. Timing & Spring Physics */
+  transition: 
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); /* <-- 0.7s is DURATION, 1.56 is BOUNCINESS */
+
+  will-change: transform, opacity;
+}
+
+/* 3. Final resting position (once scrolled into view) */
+.spring-pop-box.is-visible,
+.curious-btn-box.is-visible {
+  opacity: 1;
+  transform: translateY(0px) scale(1);
+}
+
+/* ==========================================================================
+   DYNAMIC THUMBNAIL GRID:
+   Automatically adapts height and rows for ANY number of thumbnails (1 to 50+)
+   No more hardcoded 8 rows or giant empty blue gaps!
+   ========================================================================== */
+
+.elementor-element-942ba77,
+.elementor-1284 .elementor-element.elementor-element-942ba77 {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  grid-template-rows: auto !important;
+  grid-auto-rows: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  gap: 2.5rem 2rem !important;
+  padding-top: 4% !important;
+  padding-bottom: 5% !important;
+}
+
+/* Tablet screen (2 columns) */
+@media (max-width: 1024px) {
+  .elementor-element-942ba77,
+  .elementor-1284 .elementor-element.elementor-element-942ba77 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    padding-left: 8% !important;
+    padding-right: 8% !important;
+  }
+}
+
+/* Mobile screen (1 column) */
+@media (max-width: 767px) {
+  .elementor-element-942ba77,
+  .elementor-1284 .elementor-element.elementor-element-942ba77 {
+    grid-template-columns: 1fr !important;
+    padding-left: 6% !important;
+    padding-right: 6% !important;
+    gap: 1.5rem !important;
+  }
+}
+
+/* Ensure each thumbnail card maintains clean 16:9 YouTube aspect ratio */
+.elementor-element-942ba77 .image-thumbpage {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9 !important;
+  object-fit: cover !important;
+  border-radius: 12px !important;
+  display: block !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ==========================================================================
+   PAGE SPACING CONTROLS (From Latest Thumbnails down)
+   Tightly balances section spacing, eliminating dead gaps & excess margins.
+   ========================================================================== */
+
+/* 1. Eliminate White Line Between Latest Thumbnails & Client */
+.elementor-1284 .elementor-element.elementor-element-4d7b8a8 {
+  margin-bottom: 0px !important;
+  padding-bottom: 2em !important;
+  background-color: #0260ef !important;
+}
+
+.elementor-1284 .elementor-element.elementor-element-11267ec4 {
+  margin-top: 0px !important;
+  padding-top: 0px !important;
+  background-color: #0260ef !important;
+}
+
+.elementor-1284 .elementor-element.elementor-element-4a2d7aef {
+  margin-top: 0px !important;
+  background-color: #0260ef !important;
+}
+
+/* Eliminate Elementor's 200px dead spacer at top of Client */
+.elementor-1284 .elementor-element.elementor-element-c28d521,
+.elementor-1284 .elementor-element.elementor-element-c28d521 .elementor-spacer {
+  --spacer-size: 25px !important;
+  height: 25px !important;
+}
+
+/* 2. Between Client & FAQ */
+.elementor-1284 .elementor-element.elementor-element-18a19807 {
+  padding-bottom: 3.5em !important;
+}
+
+.elementor-element-c73b0e0 {
+  margin-bottom: 0px !important;
+  line-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.elementor-1284 .elementor-element.elementor-element-7e692ff3 {
+  margin-top: 4.5em !important; /* Generous breathing room under the wave */
+  margin-bottom: 5.5em !important; /* Smooth space transitioning directly to Showcased Creators */
+}
+
+.elementor-1284 .elementor-element.elementor-element-72dbcd8a,
+.elementor-1284 .elementor-element.elementor-element-6e7afaa2 {
+  margin-top: 0px !important;
+}
+
+/* ==========================================================================
+   SMOOTH FAQ ACCORDION EXPANSION ANIMATION & CARD STYLING
+   Neutralizes old WordPress Elementor quirks (e.g. :first-of-type display:none)
+   and guarantees modern, visible white cards with crisp click animation.
+   ========================================================================== */
+
+/* Black LET'S TALK CTA Button above FAQ (matching other boxes across the site) */
+.elementor-element-27192660 .custom-button-whitebg,
+.faq-black-btn {
+  background-color: #141414 !important;
+  border: 1px solid #141414 !important;
+  border-radius: 10px !important;
+  color: #ffffff !important;
+  padding: 12px 24px !important;
+  display: block !important;
+  width: 100% !important;
+  text-align: center !important;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
+}
+
+.elementor-element-27192660 .custom-button-whitebg:hover,
+.faq-black-btn:hover {
+  background-color: transparent !important;
+  border-color: #141414 !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(-2px) !important;
+}
+
+.faq-black-btn .custom-button-text-whitebg {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  font-size: 16px !important;
+  letter-spacing: 0.5px !important;
+}
+
+.faq-black-btn:hover .custom-button-text-hidden-whitebg {
+  color: #141414 !important;
+  font-weight: 800 !important;
+  font-size: 16px !important;
+  letter-spacing: 0.5px !important;
+}
+
+.elementor-widget-accordion,
+.faqtop,
+.elementor-accordion {
+  width: 100% !important;
+}
+
+/* ==========================================================================
+   FAQ ACCORDION COMPONENT
+   ========================================================================== */
+
+/* 1. MAIN FAQ BOX - Default State (Outer Container) */
+.elementor-accordion .elementor-accordion-item,
+.elementor-accordion .elementor-accordion-item:first-of-type {
+  display: block !important;
+  background-color: #ffffff !important;   /* <-- LINE: DEFAULT BOX BACKGROUND (change to #141414 if you want box always black) */
+  color: #141414 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06) !important;
+  border: 1px solid #e9ecef !important;
+  margin-bottom: 16px !important;
+  overflow: hidden !important;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* 2. FAQ BOX TITLE (Question Bar) */
+.elementor-accordion .elementor-tab-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 18px 24px !important;
+  font-family: 'Figtree', sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #141414 !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  margin: 0 !important;
+  border: none !important;
+  transition: color 0.25s ease !important;
+}
+
+.elementor-accordion .elementor-tab-title .elementor-accordion-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 22px !important;
+  height: 22px !important;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+}
+
+.elementor-accordion .elementor-tab-title .elementor-accordion-icon svg {
+  width: 14px !important;
+  height: 14px !important;
+  fill: #0260ef !important;
+  transition: fill 0.25s ease !important;
+}
+
+.elementor-accordion .elementor-accordion-title {
+  color: #141414 !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  font-family: 'Figtree', sans-serif !important;
+  line-height: 1.4 !important;
+  transition: color 0.25s ease !important;
+}
+
+/* 3. ACCORDION WRAPPER & INNER CONTAINER */
+.faq-accordion-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.faq-accordion-wrapper.is-open {
+  grid-template-rows: 1fr;
+}
+
+.faq-accordion-inner {
+  overflow: hidden;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* 4. INSIDE BOX CONTENT (Yes, I do! You can click here...) */
+.elementor-1284 .elementor-element.elementor-element-6eb8a1e3 .elementor-accordion-item .elementor-tab-content,
+.elementor-accordion .elementor-tab-content,
+.faq-accordion-wrapper .elementor-tab-content {
+  display: block !important;
+  background-color: transparent !important;   /* <-- LINE: INSIDE BOX BACKGROUND (transparent matches parent box seamlessly) */
+  background: transparent !important;
+  border: none !important;
+  border-width: 0px !important;
+  border-style: none !important;
+  border-block-start: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 4px 24px 22px 62px !important;
+  font-family: 'Figtree', sans-serif !important;
+  font-size: 16px !important;
+  line-height: 1.65 !important;
+  color: #2b2f38 !important;                  /* <-- LINE: INSIDE BOX DEFAULT TEXT COLOR */
+  transition: opacity 0.3s ease, transform 0.3s ease, color 0.25s ease !important;
+}
+
+.faq-accordion-wrapper:not(.is-open) .elementor-tab-content {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateY(-4px) !important;
+}
+
+.faq-accordion-wrapper.is-open .elementor-tab-content,
+.elementor-1284 .elementor-element.elementor-element-6eb8a1e3 .elementor-accordion-item .faq-accordion-wrapper.is-open .elementor-tab-content {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+}
+
+.faq-accordion-wrapper .elementor-tab-content p {
+  margin: 0 !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #2b2f38 !important;
+  font-family: 'Figtree', sans-serif !important;
+  font-size: 16px !important;
+  line-height: 1.65 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: color 0.25s ease !important;
+}
+
+.faq-accordion-wrapper .elementor-tab-content a {
+  color: #0260ef !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: color 0.25s ease !important;
+}
+
+/* 5. FAQ BOX HOVER STATE (Solid Black Everywhere: Outside Box + Inside Box) */
+.elementor-accordion .elementor-accordion-item:hover,
+.elementor-accordion-item:hover .elementor-tab-title,
+.elementor-accordion-item:hover .elementor-tab-content,
+.elementor-accordion-item:hover .faq-accordion-inner,
+.elementor-accordion-item:hover .faq-accordion-wrapper,
+.elementor-1284 .elementor-element.elementor-element-6eb8a1e3 .elementor-accordion-item:hover,
+.elementor-1284 .elementor-element.elementor-element-6eb8a1e3 .elementor-accordion-item:hover .elementor-tab-content,
+.elementor-accordion .elementor-accordion-item:hover .elementor-tab-content,
+.faq-accordion-wrapper .elementor-accordion-item:hover .elementor-tab-content {
+  background-color: #141414 !important;   /* <-- LINE: HOVER SOLID BLACK BACKGROUND (both outside and inside box) */
+  background: #141414 !important;
+  border-color: #141414 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
+}
+
+.elementor-accordion-item:hover .elementor-accordion-title {
+  color: #ffffff !important;
+}
+
+.elementor-accordion .elementor-accordion-item:hover .elementor-tab-title .elementor-accordion-icon svg,
+.elementor-accordion-item:hover .elementor-accordion-icon svg,
+.elementor-accordion-item:hover .faq-chevron-icon {
+  fill: #ffffff !important;
+}
+
+.elementor-accordion-item:hover .elementor-tab-content,
+.elementor-accordion-item:hover .elementor-tab-content p,
+.faq-accordion-wrapper .elementor-accordion-item:hover .elementor-tab-content p {
+  color: #ffffff !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.elementor-accordion-item:hover .elementor-tab-content a,
+.faq-accordion-wrapper .elementor-accordion-item:hover .elementor-tab-content a {
+  color: #60a5fa !important;
+  text-decoration: underline !important;
+}
+
+/* Chevron Icon Smooth Rotation */
+.faq-chevron-icon {
+  display: inline-block;
+  transform-origin: center;
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.faq-chevron-icon.is-rotated {
+  transform: rotate(180deg);
+}
+
+/* ==========================================================================
+   CLIENT SHOWCASE (Photo on Right, Buttons Under Text, Directional Animation)
+   ========================================================================== */
+#client,
+#testimonial,
+.client-main-section {
+  scroll-margin-top: 100px !important;
+  background-color: #0260ef !important;
+  color: #ffffff !important;
+  width: 100% !important;
+  position: relative !important;
+  overflow: hidden !important;
+  padding-top: 20px !important;
+  padding-bottom: 40px !important;
+}
+
+/* ==========================================================================
+   CLIENT TITLE POSITION CONTROL (Adjust ONLY the Title Up / Down)
+   ========================================================================== */
+.client-top-spacer,
+.elementor-element-c28d521 {
+  display: none !important;            /* Removes empty spacer above the title */
+}
+
+.client-heading-wrapper,
+.elementor-element-5986e5b {
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: center !important;
+  position: relative !important;
+  top: -50px !important;               /* <-- MOVE TITLE UP (-) OR DOWN (+) HERE (Does NOT move the page!) */
+}
+
+.client-heading-title,
+.elementor-element-5986e5b .elementor-heading-title {
+  margin: 0 0 10px 0 !important;
+  line-height: 1.1 !important;
+}
+
+.client-showcase-wrapper {
+  width: 100% !important;
+  max-width: 1140px !important;
+  margin: 0 auto !important;
+  padding: 10px 24px 20px 24px !important;
+  box-sizing: border-box !important;
+}
+
+.client-showcase-container {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 36px !important;
+  width: 100% !important;
+}
+
+/* Left Column: Navigation Buttons (fixed/stable on the left, does NOT jump when quote length changes) */
+.client-nav-left-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 16px !important;
+  flex: 0 0 auto !important;
+  align-self: center !important;
+}
+
+.client-nav-btn {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  border-style: none !important;
+  box-shadow: inset 0 0 0 2px #ffffff !important;
+  color: #ffffff !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.25s ease,
+              box-shadow 0.25s ease,
+              color 0.25s ease !important;
+  outline: none !important;
+  outline-offset: 0 !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  overflow: hidden !important;
+}
+
+.client-nav-btn:hover {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 0 !important;
+  border-style: none !important;
+  box-shadow: inset 0 0 0 25px #ffffff !important;
+  color: #0260ef !important;
+  transform: scale(1.1) !important;
+  outline: none !important;
+}
+
+.client-nav-btn:active {
+  transform: scale(0.92) !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 0 !important;
+  border-style: none !important;
+  box-shadow: inset 0 0 0 25px #ffffff !important;
+  outline: none !important;
+}
+
+.client-nav-btn:focus,
+.client-nav-btn:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  border: 0 !important;
+  border-style: none !important;
+  box-shadow: none !important;
+}
+
+.client-nav-btn::-moz-focus-inner {
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+/* Authentic Ambient Orange Cursor (#muis) */
+#muis,
+.custom-orange-cursor {
+  display: block !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  border-radius: 50% !important;
+  z-index: 99999999 !important;
+  will-change: transform !important;
+  user-select: none !important;
+  transition: width 0.2s cubic-bezier(0.25, 1, 0.5, 1),
+              height 0.2s cubic-bezier(0.25, 1, 0.5, 1),
+              background-color 0.2s ease,
+              border 0.2s ease,
+              opacity 0.2s ease !important;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  #muis,
+  .custom-orange-cursor {
+    display: none !important;
+  }
+}
+
+/* Center Column: Client text (crossfade stage: quotes layered in CSS grid) */
+.client-text-col,
+.client-text-col.client-crossfade-stage {
+  flex: 1 1 auto !important;
+  max-width: 580px !important;
+  min-height: 250px !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: 1fr !important;
+  position: relative !important;
+  align-items: center !important;
+  text-align: left !important;
+}
+
+/* Individual Text Slide: Smooth Cross-Dissolve */
+.client-slide-text {
+  grid-area: 1 / 1 / 2 / 2 !important;
+  width: 100% !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: opacity 1.5s cubic-bezier(0.25, 1, 0.5, 1),
+              visibility 0.85s cubic-bezier(0.25, 1, 0.5, 1),
+              transform 0.85s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  transform: translateY(8px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  z-index: 1 !important;
+}
+
+.client-slide-text.is-active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: translateY(0) !important;
+  z-index: 2 !important;
+}
+
+.client-company-title {
+  font-family: 'Figtree', sans-serif !important;
+  font-size: clamp(28px, 3.8vw, 44px) !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  margin: 0 0 18px 0 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.5px !important;
+}
+
+.client-quote-text {
+  font-family: 'Figtree', sans-serif !important;
+  font-size: clamp(16px, 1.8vw, 19px) !important;
+  font-weight: 400 !important;
+  line-height: 1.65 !important;
+  color: #ffffff !important;
+  margin: 0 0 24px 0 !important;
+}
+
+.client-meta-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.client-author-name {
+  font-family: 'Figtree', sans-serif !important;
+  font-size: 19px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+}
+
+.client-author-role {
+  font-family: 'Figtree', sans-serif !important;
+  font-size: 15px !important;
+  font-style: italic !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  margin: 0 !important;
+}
+
+/* Right Column: Client Photo (crossfade stage: photos layered in CSS grid) */
+.client-photo-col,
+.client-photo-col.client-crossfade-stage {
+  flex: 0 0 auto !important;
+  width: clamp(260px, 32vw, 360px) !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: 1fr !important;
+  position: relative !important;
+  justify-items: center !important;
+  align-items: center !important;
+}
+
+/* Individual Photo Slide: Smooth Cross-Dissolve */
+.client-slide-photo {
+  grid-area: 1 / 1 / 2 / 2 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: opacity 1.5s cubic-bezier(0.25, 1, 0.5, 1),
+              visibility 0.85s cubic-bezier(0.25, 1, 0.5, 1),
+              transform 0.85s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  transform: scale(0.96) !important;
+  z-index: 1 !important;
+}
+
+.client-slide-photo.is-active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: scale(1) !important;
+  z-index: 2 !important;
+}
+
+.client-photo-card {
+  background-color: #ffffff !important;
+  padding: 14px !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25) !important;
+  width: 100% !important;
+  max-width: 360px !important;
+  aspect-ratio: 1 / 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+.client-photo-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 12px !important;
+  display: block !important;
+}
+
+/* Responsive Stacking on Mobile & Tablet */
+@media (max-width: 860px) {
+  .client-showcase-container {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 28px !important;
+  }
+
+  .client-photo-col {
+    width: clamp(220px, 60vw, 290px) !important;
+    order: 1 !important;
+  }
+
+  .client-text-col {
+    max-width: 100% !important;
+    min-height: 220px !important;
+    align-items: center !important;
+    text-align: center !important;
+    order: 2 !important;
+  }
+
+  .client-slide-text {
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .client-meta-info {
+    align-items: center !important;
+  }
+
+  .client-nav-left-col {
+    flex-direction: row !important;
+    justify-content: center !important;
+    order: 3 !important;
+    margin-top: 10px !important;
+  }
+}
+
+/* ==========================================================================
+   SHOWCASED CREATORS (TANGO CAROUSEL) STYLES
+   Smooth drag, cursor states, rounded corners & active slide presentation
+   ========================================================================== */
+.bdt-prime-slider-tango .swiper-tango {
+  cursor: grab !important;
+  user-select: none !important;
+}
+
+.bdt-prime-slider-tango .swiper-tango:active {
+  cursor: grabbing !important;
+}
+
+.bdt-prime-slider-tango .bdt-item {
+  cursor: grab !important;
+  border-radius: 10px !important;
+  user-select: none !important;
+}
+
+.bdt-prime-slider-tango .bdt-item:active {
+  cursor: grabbing !important;
+}
+
+.bdt-prime-slider-tango .bdt-img {
+  pointer-events: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+}
+
+.bdt-prime-slider-tango .bdt-item.swiper-slide-active {
+  clip-path: inset(0 0 0 0 round 10px 10px 10px 10px) !important;
+}
+
+.bdt-prime-slider-tango .bdt-content-wrap {
+  pointer-events: none !important;
+}
+
+.bdt-prime-slider-tango .swiper-pagination .swiper-pagination-bullet {
+  cursor: pointer !important;
+}
+
+/* ==========================================================================
+   EXPLICIT FIGTREE FONT ENFORCEMENT
+   Guarantees all text, titles, subtitles, counters, and buttons use Figtree
+   ========================================================================== */
+.elementor-heading-title,
+.bdt-prime-slider-tango,
+.bdt-prime-slider-tango *,
+.bdt-prime-slider-tango .bdt-title,
+.bdt-prime-slider-tango .bdt-subtitle,
+.elementor-counter,
+.elementor-counter * {
+  font-family: 'Figtree', sans-serif !important;
+}
+
+/* Preserve icon font glyphs */
+i.fa, i.fas, i.far, i.fab {
+  font-family: "Font Awesome 5 Free", "FontAwesome" !important;
+}
+
+/* ==========================================================================
+   SMOOTH FLOATING NAVBAR TRANSITION
+   ========================================================================== */
+#menu {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease !important;
+  will-change: transform, opacity;
+}
+
+#menu.menu-hidden {
+  transform: translateY(-110%) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ==========================================================================
+   CONTACT SECTION: Initial Black Background & Heroic Big Figtree Title
+   ========================================================================== */
+#contact,
+section#contact,
+.contact-section-wrapper {
+  background-color: #141414 !important;
+  background: #141414 !important;
+  color: #ffffff !important;
+  width: 100% !important;
+  display: block !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  margin-bottom: 0 !important;
+  border-bottom: none !important;
+}
+
+#contact h2.contact-main-title {
+  font-family: 'Figtree', sans-serif !important;
+  font-size: clamp(48px, 6.5vw, 84px) !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  text-transform: uppercase !important;
+  letter-spacing: -1.5px !important;
+  line-height: 1.05 !important;
+  margin: 0 0 16px 0 !important;
+  text-align: center !important;
+}
+
+/* ==========================================================================
+   AUTHENTIC RESTORED FOOTER & BACK TO TOP BUTTON
+   ========================================================================== */
+.authentic-footer-outer-wrapper {
+  background-color: #141414 !important;
+  background: #141414 !important;
+  width: 100% !important;
+  margin: 0 !important;
+  margin-top: -1px !important; /* Seamless overlap eliminates any subpixel hairline gap */
+  padding: 0 !important;
+  border: none !important;
+  outline: none !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.authentic-site-footer {
+  background-color: #0260ef !important;
+  background: #0260ef !important;
+  border-radius: 16px 16px 0px 0px !important;
+  position: relative !important;
+  width: 100% !important;
+  margin: 0 !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 20px 36px 14px 36px !important;
+  box-sizing: border-box !important;
+  z-index: 10 !important;
+  overflow: hidden !important;
+}
+
+.authentic-footer-inner {
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.authentic-footer-main-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  gap: 16px !important;
+}
+
+.authentic-footer-spacer {
+  flex: 0 0 130px !important;
+  display: block !important;
+}
+
+.authentic-footer-nav-col {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  gap: 8px 22px !important;
+  flex: 1 1 auto !important;
+}
+
+.footer-button-container {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.footer-nav-btn {
+  color: #ffffff !important;
+  font-family: 'Figtree', sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  display: inline-block !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 2px 0 !important;
+}
+
+.footer-nav-btn .button-text-wrapper {
+  position: relative !important;
+  overflow: hidden !important;
+  display: inline-block !important;
+  padding-bottom: 2px !important;
+}
+
+.footer-nav-btn .button-text-wrapper::after {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  width: 0 !important;
+  height: 1.5px !important;
+  background-color: #ffffff !important;
+  transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+.footer-nav-btn:hover .button-text-wrapper::after {
+  width: 100% !important;
+}
+
+.footer-nav-btn .knoptekst,
+.footer-nav-btn .knoptekst-verborgen {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  color: #ffffff !important;
+  display: block !important;
+}
+
+.footer-nav-btn .knoptekst {
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.footer-nav-btn .knoptekst-verborgen {
+  transform: translate3d(0, 100%, 0) !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+}
+
+.footer-nav-btn:hover .knoptekst {
+  transform: translate3d(0, -100%, 0) !important;
+}
+
+.footer-nav-btn:hover .knoptekst-verborgen {
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.authentic-footer-social-col {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  flex: 0 0 130px !important;
+}
+
+.authentic-footer-social-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  transition: transform 0.2s ease, opacity 0.2s ease !important;
+}
+
+.authentic-footer-social-link svg {
+  fill: #ffffff !important;
+  transition: transform 0.2s ease !important;
+}
+
+.authentic-footer-social-link:hover {
+  transform: translateY(-2px) !important;
+  opacity: 0.85 !important;
+}
+
+.authentic-footer-bottom-row {
+  text-align: center !important;
+  padding-top: 0px !important;
+}
+
+.authentic-footer-copyright {
+  font-family: 'Figtree', sans-serif !important;
+  font-size: 12px !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  margin: 0 !important;
+  letter-spacing: 0.2px !important;
+  line-height: 1.4 !important;
+}
+
+/* ==========================================================================
+   AUTHENTIC FLOATING BACK TO TOP BUTTON (WPR STT)
+   ========================================================================== */
+.authentic-back-to-top-btn {
+  position: fixed !important;
+  right: 24px !important;
+  bottom: 24px !important;
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  border: 2px solid #ff7b00 !important;
+  background-color: rgba(20, 20, 20, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 9999 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(12px) !important;
+  transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.25s ease, border-color 0.25s ease !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+}
+
+.authentic-back-to-top-btn.is-visible {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateY(0) !important;
+}
+
+.authentic-back-to-top-btn:hover {
+  background-color: #ff7b00 !important;
+}
+
+.authentic-back-to-top-btn .authentic-back-to-top-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.authentic-back-to-top-btn .authentic-back-to-top-icon svg {
+  width: 14px !important;
+  height: 14px !important;
+  fill: #ff7b00 !important;
+  transition: fill 0.25s ease !important;
+}
+
+.authentic-back-to-top-btn:hover .authentic-back-to-top-icon svg {
+  fill: #ffffff !important;
+}
+
+/* Responsive Footer adjustments */
+@media (max-width: 1024px) {
+  .authentic-site-footer {
+    padding: 18px 20px 12px 20px !important;
+  }
+  .authentic-footer-main-row {
+    flex-direction: column !important;
+    gap: 14px !important;
+    text-align: center !important;
+  }
+  .authentic-footer-spacer {
+    display: none !important;
+  }
+  .authentic-footer-social-col {
+    justify-content: center !important;
+    flex: 0 0 auto !important;
+  }
+}
+
+
+
+
+
+
+
+
