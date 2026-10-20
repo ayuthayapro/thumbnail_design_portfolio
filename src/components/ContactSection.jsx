@@ -1,33 +1,48 @@
-import { useState, useEffect, useRef } from 'react'
-import {
-  Globe,
-  Search,
-  ChevronDown,
-  Check,
-  Copy,
-  ExternalLink,
-  Send,
-  CheckCircle2,
-  AlertCircle,
-  Phone,
-  MessageCircle,
-} from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { CheckCircle2, AlertCircle, Send } from 'lucide-react'
 import { CONTACT_CONTENT } from '#constants'
 
-// Curated list of timezones modeled after Calendly's timezone picker (screenshot media_1792495406033_35a267f1)
-const TIMEZONE_DATA = [
-  { id: 'indochina', label: 'Indochina Time', zone: 'Asia/Bangkok', region: 'ASIA' },
-  { id: 'singapore', label: 'Singapore / HK Time', zone: 'Asia/Singapore', region: 'ASIA' },
-  { id: 'tokyo', label: 'Japan / Korea Time', zone: 'Asia/Tokyo', region: 'ASIA' },
-  { id: 'india', label: 'India Standard Time', zone: 'Asia/Kolkata', region: 'ASIA' },
-  { id: 'dubai', label: 'Gulf Standard Time', zone: 'Asia/Dubai', region: 'MIDDLE EAST' },
-  { id: 'london', label: 'UK / London (GMT/BST)', zone: 'Europe/London', region: 'EUROPE' },
-  { id: 'berlin', label: 'Central European (CET)', zone: 'Europe/Berlin', region: 'EUROPE' },
-  { id: 'azores', label: 'Azores Time', zone: 'Atlantic/Azores', region: 'ATLANTIC' },
-  { id: 'ny', label: 'US Eastern Time (ET)', zone: 'America/New_York', region: 'AMERICAS' },
-  { id: 'chicago', label: 'US Central Time (CT)', zone: 'America/Chicago', region: 'AMERICAS' },
-  { id: 'la', label: 'US Pacific Time (PT)', zone: 'America/Los_Angeles', region: 'AMERICAS' },
-  { id: 'sydney', label: 'Australian Eastern (AEST)', zone: 'Australia/Sydney', region: 'OCEANIA' },
+// =========================================================================
+// ✏️ EDIT YOUR CONTACT INFO & TITLES HERE (EASY CUSTOMIZATION):
+// =========================================================================
+const CONTACT_BLOCKS = {
+  // Block 1
+  availabilityTitle: 'Availability', // <-- EDIT TITLE 1 HERE (e.g. 'Availability' or 'Location')
+  country: 'Cambodia',
+  hours: 'Mon–Sun, 5–8 PM (UTC+7)',
+
+  // Block 2
+  chatTitle: 'Social Media', // <-- EDIT TITLE 2 HERE (e.g. 'Social Media' or 'Chat')
+  socials: [
+    { label: 'Telegram @boayuthaya', url: 'https://t.me/boayuthaya' },
+    { label: 'Facebook', url: 'https://www.facebook.com/bo.ayuthaya/' },
+    { label: 'LinkedIn', url: 'https://www.linkedin.com' },
+    { label: '081661190', url: 'tel:081661190' },
+  ],
+
+  // Block 3
+  emailTitle: 'Email', // <-- EDIT TITLE 3 HERE
+  email: 'ayutiatabb@gmail.com',
+
+  // Block 4
+  freelanceTitle: 'Freelance', // <-- EDIT TITLE 4 HERE
+  freelanceName: 'Fiverr',
+  freelanceUrl: 'https://www.fiverr.com',
+}
+
+// Global timezones for client convenience
+const TIMEZONE_LIST = [
+  { id: 'indochina', label: 'Indochina Time', zone: 'Asia/Bangkok' },
+  { id: 'singapore', label: 'Singapore / HK', zone: 'Asia/Singapore' },
+  { id: 'tokyo', label: 'Tokyo / Seoul', zone: 'Asia/Tokyo' },
+  { id: 'india', label: 'India (IST)', zone: 'Asia/Kolkata' },
+  { id: 'dubai', label: 'Dubai (GST)', zone: 'Asia/Dubai' },
+  { id: 'london', label: 'London (GMT/BST)', zone: 'Europe/London' },
+  { id: 'berlin', label: 'Paris / Berlin (CET)', zone: 'Europe/Berlin' },
+  { id: 'ny', label: 'New York (ET)', zone: 'America/New_York' },
+  { id: 'chicago', label: 'Chicago (CT)', zone: 'America/Chicago' },
+  { id: 'la', label: 'Los Angeles (PT)', zone: 'America/Los_Angeles' },
+  { id: 'sydney', label: 'Sydney (AEST)', zone: 'Australia/Sydney' },
 ]
 
 export default function ContactSection() {
@@ -43,27 +58,21 @@ export default function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const [copiedEmail, setCopiedEmail] = useState(false)
 
-  // Timezone state (inspired by Calendly timezone selector)
+  // Timezone state
   const [currentTime, setCurrentTime] = useState(() => new Date())
-  const [is24h, setIs24h] = useState(false)
-  const [tzSearch, setTzSearch] = useState('')
-  const [isTzOpen, setIsTzOpen] = useState(false)
   const [selectedTz, setSelectedTz] = useState(() => {
     try {
       if (typeof window !== 'undefined' && Intl?.DateTimeFormat) {
         const userZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-        const match = TIMEZONE_DATA.find((t) => t.zone === userZone)
+        const match = TIMEZONE_LIST.find((t) => t.zone === userZone)
         if (match) return match
       }
     } catch {
       // fallback
     }
-    return TIMEZONE_DATA[0] // Indochina by default
+    return TIMEZONE_LIST[0] // Indochina by default
   })
-
-  const tzDropdownRef = useRef(null)
 
   // Live second-by-second clock
   useEffect(() => {
@@ -71,25 +80,14 @@ export default function ContactSection() {
     return () => clearInterval(timer)
   }, [])
 
-  // Close timezone modal on outside click
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (tzDropdownRef.current && !tzDropdownRef.current.contains(e.target)) {
-        setIsTzOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
   // Format time for any given timezone
   const formatTime = (zone) => {
     try {
       return new Intl.DateTimeFormat('en-US', {
         timeZone: zone,
-        hour: '2-digit',
+        hour: 'numeric',
         minute: '2-digit',
-        hour12: !is24h,
+        hour12: true,
       }).format(currentTime)
     } catch {
       return '--:--'
@@ -113,7 +111,7 @@ export default function ContactSection() {
           timeZone: targetZone,
           hour: 'numeric',
           minute: '2-digit',
-          hour12: !is24h,
+          hour12: true,
         }).format(d)
 
       return `${fmt(startUtc)} – ${fmt(endUtc)}`
@@ -127,7 +125,6 @@ export default function ContactSection() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  // Placeholders WITHOUT "e.g." per user's explicit request
   const getHandlePlaceholder = (platform) => {
     switch (platform) {
       case 'Telegram':
@@ -139,12 +136,6 @@ export default function ContactSection() {
       default:
         return 'Your username or link'
     }
-  }
-
-  const handleCopyEmail = () => {
-    navigator.clipboard.writeText('ayutiatabb@gmail.com')
-    setCopiedEmail(true)
-    setTimeout(() => setCopiedEmail(false), 2200)
   }
 
   const handleSubmit = async (e) => {
@@ -199,10 +190,27 @@ export default function ContactSection() {
     setErrorMessage('')
   }
 
-  const filteredTimezones = TIMEZONE_DATA.filter((tz) =>
-    tz.label.toLowerCase().includes(tzSearch.toLowerCase()) ||
-    tz.region.toLowerCase().includes(tzSearch.toLowerCase())
-  )
+  // Clean title style matching reference photo (Image 2: Social Media, Title Case, not all-caps)
+  const blockTitleStyle = {
+    display: 'block',
+    fontSize: '18px',
+    fontWeight: 700,
+    color: '#ffffff',
+    letterSpacing: '-0.2px',
+    marginBottom: '14px',
+    fontFamily: "'Figtree', sans-serif",
+  }
+
+  const itemLinkStyle = {
+    color: '#d1d5db',
+    textDecoration: 'none',
+    fontSize: '15px',
+    fontWeight: 400,
+    lineHeight: 1.5,
+    fontFamily: "'Figtree', sans-serif",
+    transition: 'color 0.2s ease, transform 0.15s ease',
+    display: 'inline-block',
+  }
 
   return (
     <section
@@ -223,7 +231,7 @@ export default function ContactSection() {
           maxWidth: '1320px',
           margin: '0 auto',
           display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1.2fr) minmax(380px, 460px)',
+          gridTemplateColumns: 'minmax(0, 1.25fr) minmax(380px, 460px)',
           gap: 'clamp(48px, 7vw, 100px)',
           alignItems: 'start',
         }}
@@ -277,7 +285,7 @@ export default function ContactSection() {
             Tell me about your video, your channel and the style you like. I'll send concepts within 24-48 hours.
           </p>
 
-          {/* 2x2 Structured Info Grid (Wide Spacing like reference photo) */}
+          {/* 2x2 Structured Info Grid (Clean, Wide Spacing matching photo 2) */}
           <div
             style={{
               display: 'grid',
@@ -289,417 +297,98 @@ export default function ContactSection() {
             }}
             className="contact-2x2-grid"
           >
-            {/* 1. AVAILABILITY + CLEAN CALENDLY-STYLE TIMEZONE SELECTOR */}
+            {/* 1. AVAILABILITY */}
             <div>
-              <span
-                style={{
-                  display: 'block',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  letterSpacing: '1.4px',
-                  textTransform: 'uppercase',
-                  color: 'rgba(255, 255, 255, 0.4)',
-                  marginBottom: '12px',
-                }}
-              >
-                Availability
-              </span>
-              <div style={{ fontSize: '15.5px', color: '#ffffff', fontWeight: 600, lineHeight: 1.5 }}>
-                <div>Cambodia</div>
-                <div style={{ color: '#8e929e', fontSize: '14px', marginTop: '3px' }}>
-                  Mon–Sun, 5–8 PM (UTC+7)
-                </div>
-              </div>
+              <span style={blockTitleStyle}>{CONTACT_BLOCKS.availabilityTitle}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '15px' }}>
+                <span style={{ color: '#d1d5db', lineHeight: 1.5 }}>{CONTACT_BLOCKS.country}</span>
+                <span style={{ color: '#9ca3af', fontSize: '14.5px', lineHeight: 1.5 }}>
+                  {CONTACT_BLOCKS.hours}
+                </span>
 
-              {/* Calendly-style Timezone Pill Trigger */}
-              <div ref={tzDropdownRef} style={{ position: 'relative', marginTop: '12px' }}>
-                <button
-                  type="button"
-                  onClick={() => setIsTzOpen((prev) => !prev)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '5px 10px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    borderRadius: '7px',
-                    color: '#c5c8d4',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    fontFamily: "'Figtree', sans-serif",
-                    transition: 'all 0.18s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.09)'
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.22)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)'
-                  }}
-                >
-                  <Globe size={12} style={{ color: '#0260ef' }} />
-                  <span>
-                    {selectedTz.label} ({formatTime(selectedTz.zone)})
-                  </span>
-                  <ChevronDown
-                    size={12}
-                    style={{
-                      transform: isTzOpen ? 'rotate(180deg)' : 'none',
-                      transition: 'transform 0.18s ease',
-                      color: '#717684',
+                {/* Clean, Subtle Timezone Converter (No clunky box, no glitch) */}
+                <div style={{ marginTop: '4px' }}>
+                  <select
+                    value={selectedTz.id}
+                    onChange={(e) => {
+                      const match = TIMEZONE_LIST.find((t) => t.id === e.target.value)
+                      if (match) setSelectedTz(match)
                     }}
-                  />
-                </button>
-
-                {/* Dropdown Popup Panel (Exact Calendly Layout from screenshot) */}
-                {isTzOpen && (
-                  <div
                     style={{
-                      position: 'absolute',
-                      top: 'calc(100% + 8px)',
-                      left: 0,
-                      width: '290px',
-                      backgroundColor: '#1b1b1e',
+                      background: 'rgba(255, 255, 255, 0.06)',
                       border: '1px solid rgba(255, 255, 255, 0.14)',
-                      borderRadius: '12px',
-                      padding: '14px',
-                      boxShadow: '0 20px 45px rgba(0, 0, 0, 0.75)',
-                      zIndex: 100,
-                      boxSizing: 'border-box',
+                      borderRadius: '8px',
+                      color: '#d1d5db',
+                      fontSize: '13px',
+                      padding: '5px 10px',
+                      outline: 'none',
+                      cursor: 'pointer',
+                      fontFamily: "'Figtree', sans-serif",
                     }}
                   >
-                    {/* Search Bar */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '7px 10px',
-                        backgroundColor: '#111113',
-                        border: '1px solid rgba(255, 255, 255, 0.14)',
-                        borderRadius: '7px',
-                        marginBottom: '10px',
-                      }}
-                    >
-                      <Search size={13} style={{ color: '#71717a' }} />
-                      <input
-                        type="text"
-                        value={tzSearch}
-                        onChange={(e) => setTzSearch(e.target.value)}
-                        placeholder="Search timezone..."
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          outline: 'none',
-                          color: '#ffffff',
-                          fontSize: '12px',
-                          width: '100%',
-                          fontFamily: "'Figtree', sans-serif",
-                        }}
-                      />
-                    </div>
-
-                    {/* AM/PM vs 24h Toggle */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        paddingBottom: '8px',
-                        marginBottom: '8px',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-                      }}
-                    >
-                      <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#a1a1aa', letterSpacing: '0.8px' }}>
-                        TIME ZONE
-                      </span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ fontSize: '10.5px', color: !is24h ? '#ffffff' : '#71717a', fontWeight: 600 }}>
-                          am/pm
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setIs24h((prev) => !prev)}
-                          style={{
-                            width: '30px',
-                            height: '16px',
-                            backgroundColor: is24h ? '#0260ef' : '#333338',
-                            borderRadius: '20px',
-                            border: 'none',
-                            cursor: 'pointer',
-                            position: 'relative',
-                            padding: 0,
-                            transition: 'background-color 0.2s ease',
-                          }}
-                        >
-                          <span
-                            style={{
-                              position: 'absolute',
-                              top: '2px',
-                              left: is24h ? '16px' : '2px',
-                              width: '12px',
-                              height: '12px',
-                              backgroundColor: '#ffffff',
-                              borderRadius: '50%',
-                              transition: 'left 0.2s ease',
-                            }}
-                          />
-                        </button>
-                        <span style={{ fontSize: '10.5px', color: is24h ? '#ffffff' : '#71717a', fontWeight: 600 }}>
-                          24h
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Converted Hours Banner */}
-                    <div
-                      style={{
-                        padding: '7px 9px',
-                        backgroundColor: 'rgba(2, 96, 239, 0.1)',
-                        border: '1px solid rgba(2, 96, 239, 0.25)',
-                        borderRadius: '7px',
-                        marginBottom: '8px',
-                        fontSize: '11px',
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      <div style={{ fontWeight: 700, color: '#bfdbfe' }}>My 5–8 PM is in your time:</div>
-                      <div style={{ color: '#93c5fd', fontWeight: 600 }}>{getConvertedWorkingHours(selectedTz.zone)}</div>
-                    </div>
-
-                    {/* Timezones List */}
-                    <div
-                      style={{
-                        maxHeight: '160px',
-                        overflowY: 'auto',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '2px',
-                      }}
-                    >
-                      {filteredTimezones.map((tz) => {
-                        const isSelected = selectedTz.id === tz.id
-                        return (
-                          <button
-                            key={tz.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedTz(tz)
-                              setIsTzOpen(false)
-                            }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              padding: '6px 8px',
-                              borderRadius: '6px',
-                              border: 'none',
-                              backgroundColor: isSelected ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                              color: isSelected ? '#ffffff' : '#d4d4d8',
-                              fontSize: '12px',
-                              cursor: 'pointer',
-                              textAlign: 'left',
-                              width: '100%',
-                              fontFamily: "'Figtree', sans-serif",
-                            }}
-                            onMouseEnter={(e) => {
-                              if (!isSelected) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
-                            }}
-                            onMouseLeave={(e) => {
-                              if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'
-                            }}
-                          >
-                            <span style={{ fontWeight: isSelected ? 700 : 500 }}>{tz.label}</span>
-                            <span style={{ fontWeight: 700, fontSize: '11.5px', color: isSelected ? '#60a5fa' : '#8e929e' }}>
-                              {formatTime(tz.zone)}
-                            </span>
-                          </button>
-                        )
-                      })}
-                    </div>
+                    {TIMEZONE_LIST.map((tz) => (
+                      <option key={tz.id} value={tz.id} style={{ backgroundColor: '#141414', color: '#ffffff' }}>
+                        {tz.label} ({formatTime(tz.zone)})
+                      </option>
+                    ))}
+                  </select>
+                  <div style={{ fontSize: '12px', color: '#60a5fa', marginTop: '6px', fontWeight: 500 }}>
+                    My 5–8 PM is {getConvertedWorkingHours(selectedTz.zone)} in your time
                   </div>
-                )}
+                </div>
               </div>
             </div>
 
-            {/* 2. CHAT */}
+            {/* 2. CHAT / SOCIAL MEDIA (Shift+Enter on each line, with spacing, NO ICONS like photo 2) */}
             <div>
-              <span
-                style={{
-                  display: 'block',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  letterSpacing: '1.4px',
-                  textTransform: 'uppercase',
-                  color: 'rgba(255, 255, 255, 0.4)',
-                  marginBottom: '12px',
-                }}
-              >
-                Chat
-              </span>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '15px' }}>
-                {/* Phone */}
-                <a
-                  href="tel:081661190"
-                  style={{
-                    color: '#ffffff',
-                    textDecoration: 'none',
-                    fontWeight: 600,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '7px',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#0260ef')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
-                >
-                  <Phone size={14} style={{ color: '#0260ef' }} />
-                  <span>081661190</span>
-                </a>
+              <span style={blockTitleStyle}>{CONTACT_BLOCKS.chatTitle}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {CONTACT_BLOCKS.socials.map((item, idx) => (
+                  <a
+                    key={idx}
+                    href={item.url}
+                    target={item.url.startsWith('http') ? '_blank' : undefined}
+                    rel={item.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    style={itemLinkStyle}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#d1d5db')}
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            </div>
 
-                {/* Telegram */}
+            {/* 3. EMAIL (Shift+Enter clean text, NO ICONS) */}
+            <div>
+              <span style={blockTitleStyle}>{CONTACT_BLOCKS.emailTitle}</span>
+              <div>
                 <a
-                  href="https://t.me/boayuthaya"
+                  href={`mailto:${CONTACT_BLOCKS.email}`}
+                  style={itemLinkStyle}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#d1d5db')}
+                >
+                  {CONTACT_BLOCKS.email}
+                </a>
+              </div>
+            </div>
+
+            {/* 4. FREELANCE (Shift+Enter clean text, NO ICONS) */}
+            <div>
+              <span style={blockTitleStyle}>{CONTACT_BLOCKS.freelanceTitle}</span>
+              <div>
+                <a
+                  href={CONTACT_BLOCKS.freelanceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{
-                    color: '#f1f1f1',
-                    textDecoration: 'none',
-                    fontWeight: 500,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '7px',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#229ed9')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#f1f1f1')}
+                  style={itemLinkStyle}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#d1d5db')}
                 >
-                  <MessageCircle size={14} style={{ color: '#229ed9' }} />
-                  <span>Telegram @boayuthaya</span>
+                  {CONTACT_BLOCKS.freelanceName}
                 </a>
-
-                {/* Facebook & LinkedIn */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#8e929e', fontSize: '14px', marginTop: '2px' }}>
-                  <a
-                    href="https://www.facebook.com/bo.ayuthaya/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: '#8e929e', textDecoration: 'none', transition: 'color 0.2s ease' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = '#1877f2')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#8e929e')}
-                  >
-                    Facebook
-                  </a>
-                  <span>•</span>
-                  <a
-                    href="https://www.linkedin.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: '#8e929e', textDecoration: 'none', transition: 'color 0.2s ease' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = '#0a66c2')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#8e929e')}
-                  >
-                    LinkedIn
-                  </a>
-                </div>
               </div>
-            </div>
-
-            {/* 3. EMAIL */}
-            <div>
-              <span
-                style={{
-                  display: 'block',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  letterSpacing: '1.4px',
-                  textTransform: 'uppercase',
-                  color: 'rgba(255, 255, 255, 0.4)',
-                  marginBottom: '12px',
-                }}
-              >
-                Email
-              </span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <a
-                  href="mailto:ayutiatabb@gmail.com"
-                  style={{
-                    color: '#ffffff',
-                    textDecoration: 'none',
-                    fontSize: '15px',
-                    fontWeight: 600,
-                    transition: 'color 0.2s ease',
-                    wordBreak: 'break-all',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#0260ef')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
-                >
-                  ayutiatabb@gmail.com
-                </a>
-                <button
-                  type="button"
-                  onClick={handleCopyEmail}
-                  title="Copy email"
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: '3px',
-                    color: copiedEmail ? '#22c55e' : '#717684',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'color 0.2s ease',
-                  }}
-                >
-                  {copiedEmail ? <Check size={14} /> : <Copy size={14} />}
-                </button>
-              </div>
-              {copiedEmail && (
-                <span style={{ fontSize: '11px', color: '#22c55e', marginTop: '4px', display: 'block', fontWeight: 600 }}>
-                  Copied!
-                </span>
-              )}
-            </div>
-
-            {/* 4. FREELANCE */}
-            <div>
-              <span
-                style={{
-                  display: 'block',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  letterSpacing: '1.4px',
-                  textTransform: 'uppercase',
-                  color: 'rgba(255, 255, 255, 0.4)',
-                  marginBottom: '12px',
-                }}
-              >
-                Freelance
-              </span>
-              <a
-                href="https://www.fiverr.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  color: '#ffffff',
-                  textDecoration: 'none',
-                  fontSize: '15px',
-                  fontWeight: 600,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'color 0.2s ease',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#1dbf73')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
-              >
-                <span>Fiverr</span>
-                <ExternalLink size={13} style={{ color: '#717684' }} />
-              </a>
             </div>
           </div>
         </div>
@@ -720,7 +409,7 @@ export default function ContactSection() {
           }}
           className="contact-white-card"
         >
-          {/* Card Title (No Subtitle per user request) */}
+          {/* Card Title (No Subtitle) */}
           <div style={{ marginBottom: '24px' }}>
             <h3
               style={{
@@ -738,7 +427,7 @@ export default function ContactSection() {
 
           {!isSubmitted ? (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '19px' }}>
-              {/* Field 1: Full Name (NO "e.g.") */}
+              {/* Field 1: Full Name */}
               <div>
                 <label
                   htmlFor="cf-name"
@@ -786,7 +475,7 @@ export default function ContactSection() {
                 />
               </div>
 
-              {/* Field 2: Email (NO "e.g.") */}
+              {/* Field 2: Email */}
               <div>
                 <label
                   htmlFor="cf-email"
@@ -885,7 +574,7 @@ export default function ContactSection() {
                 </select>
               </div>
 
-              {/* Field 4: Username or Number on that app (NO "e.g.") */}
+              {/* Field 4: Username or Number on that app */}
               <div>
                 <label
                   htmlFor="cf-handle"
@@ -933,7 +622,7 @@ export default function ContactSection() {
                 />
               </div>
 
-              {/* Field 5: What do you need? (NO "e.g.") */}
+              {/* Field 5: What do you need? */}
               <div>
                 <label
                   htmlFor="cf-details"
