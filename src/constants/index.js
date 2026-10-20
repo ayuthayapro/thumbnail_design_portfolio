@@ -176,13 +176,22 @@ export const CREATORS_STATS = {
 
 export const CONTACT_CONTENT = {
   title: "LET'S WORK G",
-  subtitle: "Fill out the form below or message me directly on Telegram or Facebook.",
+  headingLine1: "Got a Video?",
+  headingLine2: "Let's Make It Click.",
+  subtitle: "Tell me about your video, your channel and the style you like. I'll send concepts within 24-48 hours.",
+  endpoint: "https://formspree.io/f/mrpevdjb",
   channels: {
+    phone: {
+      number: "081661190",
+      display: "081661190",
+      url: "tel:081661190",
+      label: "Phone",
+    },
     telegram: {
       handle: "@boayuthaya",
       url: "https://t.me/boayuthaya",
       label: "Telegram",
-      desc: "Fastest reply (Instant DM)",
+      desc: "Fastest reply",
     },
     facebook: {
       handle: "Bo Ayuthaya",
@@ -190,16 +199,19 @@ export const CONTACT_CONTENT = {
       label: "Facebook",
       desc: "Chat on Messenger",
     },
+    linkedin: {
+      handle: "Bo Ayuthaya",
+      url: "https://www.linkedin.com",
+      label: "LinkedIn",
+    },
     email: {
       address: "ayutiatabb@gmail.com",
       url: "mailto:ayutiatabb@gmail.com",
       label: "Email",
-      desc: "Send project details",
     },
     fiverr: {
       url: "https://www.fiverr.com",
       label: "Fiverr",
-      desc: "Safe escrow & reviews",
     },
   },
 }

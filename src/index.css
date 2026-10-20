@@ -938,6 +938,276 @@ section#contact,
 }
 
 /* ==========================================================================
+   CLIENT REQUEST FORM — Clean white card on the dark contact page
+   ========================================================================== */
+.request-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: clamp(26px, 4vw, 44px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Small helper line so the client immediately knows what happens next */
+.request-card-intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14.5px;
+  color: #5c6470;
+  line-height: 1.5;
+  margin: 0 0 28px 0;
+}
+
+.request-card-intro svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #0260ef;
+}
+
+.request-form {
+  display: grid;
+  gap: 20px;
+}
+
+.request-row-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 18px;
+}
+
+.request-label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #262d3a;
+  letter-spacing: 0.1px;
+  margin: 0 0 7px 0;
+}
+
+.request-required {
+  color: #0260ef;
+}
+
+.request-input,
+.request-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 16px;
+  background: #f7f8fa;
+  border: 1.5px solid #e4e7ee;
+  border-radius: 12px;
+  color: #161b26;
+  font-size: 15px;
+  font-family: 'Figtree', sans-serif !important;
+  outline: none;
+  transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.request-input::placeholder,
+.request-textarea::placeholder {
+  color: #9aa1ad;
+}
+
+.request-input:hover,
+.request-textarea:hover {
+  border-color: #cdd3dd;
+}
+
+.request-input:focus,
+.request-textarea:focus {
+  border-color: #0260ef;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(2, 96, 239, 0.12);
+}
+
+.request-textarea {
+  resize: vertical;
+  min-height: 116px;
+  max-height: 280px;
+  line-height: 1.55;
+  display: block;
+}
+
+/* Platform selector: Telegram / Facebook / Email */
+.request-platform-label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #262d3a;
+  letter-spacing: 0.1px;
+  margin: 0 0 10px 0;
+}
+
+.request-platform-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.request-platform-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #e4e7ee;
+  background: #f7f8fa;
+  color: #4b5261;
+  font-size: 14.5px;
+  font-weight: 700;
+  font-family: 'Figtree', sans-serif !important;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background-color 0.18s ease,
+    color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.request-platform-btn svg {
+  flex-shrink: 0;
+}
+
+.request-platform-btn:hover {
+  border-color: #cdd3dd;
+  background: #f1f3f7;
+  color: #262d3a;
+}
+
+.request-platform-btn.is-selected {
+  border-color: #0260ef;
+  background: #eef5ff;
+  color: #0260ef;
+  box-shadow: 0 0 0 4px rgba(2, 96, 239, 0.1);
+}
+
+.request-platform-check {
+  display: none;
+  margin-left: 2px;
+}
+
+.request-platform-btn.is-selected .request-platform-check {
+  display: inline-flex;
+}
+
+/* Submit */
+.request-submit {
+  width: 100%;
+  padding: 15px 28px;
+  border: none;
+  border-radius: 12px;
+  background: #0260ef;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  font-family: 'Figtree', sans-serif !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+  box-shadow: 0 10px 24px rgba(2, 96, 239, 0.28);
+  transition: background-color 0.18s ease, transform 0.15s ease,
+    box-shadow 0.18s ease;
+}
+
+.request-submit:hover:not(:disabled) {
+  background: #024fc5;
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(2, 96, 239, 0.32);
+}
+
+.request-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.request-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Success state (on the white card) */
+.request-success {
+  text-align: center;
+  padding: 26px 8px;
+  color: #161b26;
+}
+
+.request-success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #eef5ff;
+  color: #0260ef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.request-success h3 {
+  font-size: 26px;
+  font-weight: 800;
+  color: #161b26;
+  margin: 0 0 12px 0;
+}
+
+.request-success p {
+  font-size: 15.5px;
+  color: #5c6470;
+  max-width: 480px;
+  margin: 0 auto 28px;
+  line-height: 1.6;
+}
+
+.request-success-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+}
+
+.request-success-cta {
+  padding: 12px 24px;
+  background: #0260ef;
+  color: #ffffff;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 20px rgba(2, 96, 239, 0.25);
+  transition: background-color 0.18s ease, transform 0.15s ease;
+}
+
+.request-success-cta:hover {
+  background: #024fc5;
+  transform: translateY(-1px);
+}
+
+.request-success-reset {
+  padding: 12px 20px;
+  background: transparent;
+  color: #5c6470;
+  border: 1.5px solid #e4e7ee;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Figtree', sans-serif !important;
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+
+.request-success-reset:hover {
+  border-color: #cdd3dd;
+  color: #262d3a;
+}
+
+/* ==========================================================================
    AUTHENTIC RESTORED FOOTER & BACK TO TOP BUTTON
    ========================================================================== */
 .authentic-footer-outer-wrapper {
@@ -1183,6 +1453,42 @@ section#contact,
     flex: 0 0 auto !important;
   }
 }
+
+/* ==========================================================================
+   CONTACT SPLIT SECTION & TIMEZONE WIDGET
+   ========================================================================== */
+.contact-split-section {
+  background-color: #141414 !important;
+  background: #141414 !important;
+  border: none !important;
+  margin: 0 !important;
+}
+
+@media (min-width: 980px) {
+  .contact-container {
+    grid-template-columns: 1.15fr 0.95fr !important;
+    gap: 60px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .contact-info-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+}
+
+.contact-card-wrapper input,
+.contact-card-wrapper select,
+.contact-card-wrapper textarea {
+  font-family: 'Figtree', sans-serif !important;
+}
+
+.contact-card-wrapper input::placeholder,
+.contact-card-wrapper textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
 
 
 

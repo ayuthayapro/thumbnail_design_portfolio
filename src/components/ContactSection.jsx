@@ -1,22 +1,140 @@
-import { useState } from 'react'
-import { CheckCircle2, ExternalLink } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import {
+  Globe,
+  Search,
+  ChevronDown,
+  Check,
+  Copy,
+  ExternalLink,
+  Send,
+  CheckCircle2,
+  AlertCircle,
+  Phone,
+  MessageCircle,
+} from 'lucide-react'
 import { CONTACT_CONTENT } from '#constants'
 
+// Curated list of global timezones for international creators and clients
+const TIMEZONES = [
+  { id: 'indochina', label: 'Indochina Time', city: 'Phnom Penh / Bangkok', zone: 'Asia/Bangkok', region: 'ASIA' },
+  { id: 'singapore', label: 'Singapore / HK Time', city: 'Singapore / Hong Kong', zone: 'Asia/Singapore', region: 'ASIA' },
+  { id: 'tokyo', label: 'Japan / Korea Time', city: 'Tokyo / Seoul', zone: 'Asia/Tokyo', region: 'ASIA' },
+  { id: 'india', label: 'India Standard Time', city: 'New Delhi / Mumbai', zone: 'Asia/Kolkata', region: 'ASIA' },
+  { id: 'dubai', label: 'Gulf Standard Time', city: 'Dubai / Abu Dhabi', zone: 'Asia/Dubai', region: 'MIDDLE EAST' },
+  { id: 'london', label: 'UK / London (GMT/BST)', city: 'London / Dublin', zone: 'Europe/London', region: 'EUROPE' },
+  { id: 'berlin', label: 'Central European (CET)', city: 'Berlin / Paris / Amsterdam', zone: 'Europe/Berlin', region: 'EUROPE' },
+  { id: 'azores', label: 'Azores Time', city: 'Ponta Delgada', zone: 'Atlantic/Azores', region: 'ATLANTIC' },
+  { id: 'ny', label: 'US Eastern Time (ET)', city: 'New York / Miami / Toronto', zone: 'America/New_York', region: 'AMERICAS' },
+  { id: 'chicago', label: 'US Central Time (CT)', city: 'Chicago / Dallas', zone: 'America/Chicago', region: 'AMERICAS' },
+  { id: 'la', label: 'US Pacific Time (PT)', city: 'Los Angeles / Vancouver', zone: 'America/Los_Angeles', region: 'AMERICAS' },
+  { id: 'sydney', label: 'Australian Eastern (AEST)', city: 'Sydney / Melbourne', zone: 'Australia/Sydney', region: 'OCEANIA' },
+]
+
 export default function ContactSection() {
+  // Form state
   const [formData, setFormData] = useState({
     name: '',
-    channelLink: '',
     email: '',
-    platform: 'telegram',
+    platform: 'Telegram',
     handle: '',
-    message: '',
+    details: '',
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [copiedEmail, setCopiedEmail] = useState(false)
 
-  const handlePlatformChange = (platformKey) => {
-    setFormData((prev) => ({ ...prev, platform: platformKey }))
+  // Timezone selector state with lazy initializers
+  const [currentTime, setCurrentTime] = useState(() => new Date())
+  const [is24h, setIs24h] = useState(false)
+  const [tzSearch, setTzSearch] = useState('')
+  const [isTzOpen, setIsTzOpen] = useState(false)
+  const [selectedTz, setSelectedTz] = useState(() => {
+    try {
+      if (typeof window !== 'undefined' && Intl?.DateTimeFormat) {
+        const userZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+        const match = TIMEZONES.find((t) => t.zone === userZone)
+        if (match) return match
+      }
+    } catch {
+      // fallback
+    }
+    return TIMEZONES[0] // Indochina by default
+  })
+  const tzDropdownRef = useRef(null)
+
+  // Update clock every second
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  // Close timezone dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (tzDropdownRef.current && !tzDropdownRef.current.contains(e.target)) {
+        setIsTzOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Format time for a given timezone
+  const formatTime = (zone) => {
+    try {
+      return new Intl.DateTimeFormat('en-US', {
+        timeZone: zone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: !is24h,
+      }).format(currentTime)
+    } catch {
+      return '--:--'
+    }
+  }
+
+  // Calculate local equivalent of creator's Indochina working hours (17:00 - 20:00 UTC+7)
+  const getConvertedWorkingHours = (targetZone) => {
+    try {
+      const utcYear = currentTime.getUTCFullYear()
+      const utcMonth = currentTime.getUTCMonth()
+      const utcDate = currentTime.getUTCDate()
+
+      // 17:00 UTC+7 = 10:00 UTC
+      const startUtc = new Date(Date.UTC(utcYear, utcMonth, utcDate, 10, 0, 0))
+      // 20:00 UTC+7 = 13:00 UTC
+      const endUtc = new Date(Date.UTC(utcYear, utcMonth, utcDate, 13, 0, 0))
+
+      const fmt = (d) =>
+        new Intl.DateTimeFormat('en-US', {
+          timeZone: targetZone,
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: !is24h,
+        }).format(d)
+
+      return `${fmt(startUtc)} – ${fmt(endUtc)}`
+    } catch {
+      return '5:00 PM – 8:00 PM (UTC+7)'
+    }
+  }
+
+  // Check if creator is currently active (within 17:00 - 20:00 UTC+7)
+  const isCreatorActiveNow = () => {
+    try {
+      const bkkParts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Bangkok',
+        hour: 'numeric',
+        hourCycle: 'h23',
+      }).formatToParts(currentTime)
+      const hourPart = bkkParts.find((p) => p.type === 'hour')
+      const hour = hourPart ? parseInt(hourPart.value, 10) : 0
+      return hour >= 17 && hour < 20
+    } catch {
+      return false
+    }
   }
 
   const handleChange = (e) => {
@@ -24,375 +142,965 @@ export default function ContactSection() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const getHandlePlaceholder = (platform) => {
+    switch (platform) {
+      case 'Telegram':
+        return 'e.g. @yourusername or phone number'
+      case 'Facebook':
+        return 'e.g. Facebook profile link or name'
+      case 'LinkedIn':
+        return 'e.g. LinkedIn profile link or name'
+      default:
+        return 'Your username or link'
+    }
+  }
+
+  const handleCopyEmail = () => {
+    const email = CONTACT_CONTENT?.channels?.email?.address || 'ayutiatabb@gmail.com'
+    navigator.clipboard.writeText(email)
+    setCopiedEmail(true)
+    setTimeout(() => setCopiedEmail(false), 2200)
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setErrorMessage('')
 
-    // Construct mailto link so user can immediately send via email client or store data
-    const subject = encodeURIComponent(`Thumbnail Request from ${formData.name || 'Client'}`)
-    const body = encodeURIComponent(
-      `Name: ${formData.name}\n` +
-      `Channel Link: ${formData.channelLink}\n` +
-      `Email: ${formData.email}\n` +
-      `Preferred Contact: ${formData.platform.toUpperCase()} (${formData.handle})\n\n` +
-      `Video Topic / Thumbnail Idea:\n${formData.message}\n`
-    )
+    try {
+      const endpoint = CONTACT_CONTENT?.endpoint || 'https://formspree.io/f/mrpevdjb'
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          'Full Name': formData.name,
+          Email: formData.email,
+          'Where to Message': formData.platform,
+          'Username or Number': formData.handle,
+          'What They Need': formData.details,
+          _replyto: formData.email,
+          _subject: `New Request from ${formData.name} via ${formData.platform}`,
+        }),
+      })
 
-    // Simulate fast submission & show confirmation
-    setTimeout(() => {
+      if (response.ok) {
+        setIsSubmitted(true)
+      } else {
+        const data = await response.json().catch(() => null)
+        setErrorMessage(
+          data?.errors?.map((err) => err.message).join(', ') ||
+            'Failed to send request. Please check your fields or message me directly on Telegram!'
+        )
+      }
+    } catch {
+      setErrorMessage('Network connection error. Please try again or reach out on Telegram.')
+    } finally {
       setIsSubmitting(false)
-      setIsSubmitted(true)
-      // Optional mailto trigger as fallback
-      window.open(`mailto:${CONTACT_CONTENT.channels.email.address}?subject=${subject}&body=${body}`, '_blank')
-    }, 600)
+    }
   }
 
   const handleReset = () => {
     setFormData({
       name: '',
-      channelLink: '',
       email: '',
-      platform: 'telegram',
+      platform: 'Telegram',
       handle: '',
-      message: '',
+      details: '',
     })
     setIsSubmitted(false)
+    setErrorMessage('')
   }
+
+  const filteredTimezones = TIMEZONES.filter((tz) =>
+    tz.label.toLowerCase().includes(tzSearch.toLowerCase()) ||
+    tz.city.toLowerCase().includes(tzSearch.toLowerCase()) ||
+    tz.region.toLowerCase().includes(tzSearch.toLowerCase())
+  )
+
+  const activeNow = isCreatorActiveNow()
 
   return (
     <section
       id="contact"
-      className="contact-section-wrapper"
+      className="contact-split-section"
       style={{
         backgroundColor: '#141414',
         background: '#141414',
-        padding: 'clamp(70px, 9vw, 120px) 20px',
         color: '#ffffff',
         fontFamily: "'Figtree', sans-serif",
-        width: '100%',
+        padding: 'clamp(70px, 8vw, 120px) 24px',
         position: 'relative',
-        margin: 0,
-        marginBottom: 0,
+        width: '100%',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
       }}
     >
-      <div style={{ maxWidth: '860px', margin: '0 auto', width: '100%' }}>
-        {/* Section Heading */}
-        <div style={{ textAlign: 'center', marginBottom: 'clamp(36px, 5vw, 55px)' }}>
-          <h2
-            className="contact-main-title"
-            style={{
-              fontSize: 'clamp(48px, 6.5vw, 84px)',
-              fontWeight: 900,
-              letterSpacing: '-1.5px',
-              margin: '0 0 16px 0',
-              color: '#ffffff',
-              textTransform: 'uppercase',
-              fontFamily: "'Figtree', sans-serif",
-              lineHeight: 1.05,
-            }}
-          >
-            {CONTACT_CONTENT.title}
-          </h2>
+      <div
+        className="contact-container"
+        style={{
+          maxWidth: '1240px',
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: 'clamp(40px, 6vw, 70px)',
+          alignItems: 'start',
+        }}
+      >
+        {/* ===================================================================
+            LEFT COLUMN: Creator Info, Headings, 2x2 Grid & Timezone Converter
+            =================================================================== */}
+        <div className="contact-left-col" style={{ display: 'flex', flexDirection: 'column' }}>
+          {/* Main Titles */}
+          <div style={{ marginBottom: '28px' }}>
+            <h2
+              style={{
+                fontSize: 'clamp(38px, 5.2vw, 68px)',
+                fontWeight: 900,
+                letterSpacing: '-1.5px',
+                lineHeight: 1.05,
+                margin: '0 0 8px 0',
+                color: '#ffffff',
+                fontFamily: "'Figtree', sans-serif",
+              }}
+            >
+              Got a Video?
+            </h2>
+            <h2
+              style={{
+                fontSize: 'clamp(38px, 5.2vw, 68px)',
+                fontWeight: 900,
+                letterSpacing: '-1.5px',
+                lineHeight: 1.05,
+                margin: 0,
+                color: '#ffffff',
+                fontFamily: "'Figtree', sans-serif",
+              }}
+            >
+              Let's Make It Click.
+            </h2>
+          </div>
+
+          {/* Subtitle */}
           <p
             style={{
-              fontSize: 'clamp(16px, 2vw, 19px)',
-              color: '#a0a5ad',
-              maxWidth: '620px',
-              margin: '0 auto',
+              fontSize: 'clamp(15px, 1.4vw, 17px)',
               lineHeight: 1.6,
-              fontFamily: "'Figtree', sans-serif",
+              color: '#9e9ea7',
+              maxWidth: '520px',
+              margin: '0 0 clamp(36px, 5vw, 54px) 0',
+              fontWeight: 400,
             }}
           >
-            {CONTACT_CONTENT.subtitle}
+            Tell me about your video, your channel and the style you like. I'll send concepts within 24-48 hours.
           </p>
-        </div>
 
-        {/* Main Request Form Card */}
-        <div
-          style={{
-            backgroundColor: '#1b1b1b',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: '20px',
-            padding: 'clamp(24px, 5vw, 44px)',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.7)',
-            marginBottom: '40px',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
-          {/* Subtle Blue Glow in corner */}
+          {/* 2x2 Structured Info Grid */}
           <div
+            className="contact-info-grid"
             style={{
-              position: 'absolute',
-              top: '-80px',
-              right: '-80px',
-              width: '200px',
-              height: '200px',
-              background: 'radial-gradient(circle, rgba(2, 96, 239, 0.25) 0%, transparent 70%)',
-              pointerEvents: 'none',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: 'clamp(28px, 4vw, 42px) clamp(20px, 3vw, 36px)',
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              paddingTop: 'clamp(28px, 4vw, 40px)',
             }}
-          />
-
-          {!isSubmitted ? (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
-              {/* Row 1: Name & Channel Link */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 700, marginBottom: '8px', color: '#e6e7ed' }}>
-                    Your Name <span style={{ color: '#0260ef' }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    required
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="e.g. John"
-                    style={{
-                      width: '100%',
-                      padding: '14px 18px',
-                      backgroundColor: '#1b1b1b',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      borderRadius: '10px',
-                      color: '#ffffff',
-                      fontSize: '15px',
-                      outline: 'none',
-                      fontFamily: "'Figtree', sans-serif",
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 700, marginBottom: '8px', color: '#e6e7ed' }}>
-                    YouTube Channel Link <span style={{ color: '#0260ef' }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="channelLink"
-                    required
-                    value={formData.channelLink}
-                    onChange={handleChange}
-                    placeholder="e.g. youtube.com/@yourchannel"
-                    style={{
-                      width: '100%',
-                      padding: '14px 18px',
-                      backgroundColor: '#1b1b1b',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      borderRadius: '10px',
-                      color: '#ffffff',
-                      fontSize: '15px',
-                      outline: 'none',
-                      fontFamily: "'Figtree', sans-serif",
-                    }}
-                  />
+          >
+            {/* Block 1: Availability */}
+            <div className="contact-grid-block">
+              <span
+                style={{
+                  display: 'block',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  letterSpacing: '1.2px',
+                  textTransform: 'uppercase',
+                  color: 'rgba(255, 255, 255, 0.45)',
+                  marginBottom: '10px',
+                }}
+              >
+                Availability
+              </span>
+              <div style={{ fontSize: '15px', color: '#f1f1f1', fontWeight: 600, lineHeight: 1.5 }}>
+                <div>Cambodia</div>
+                <div style={{ color: '#a0a0aa', fontSize: '13.5px', marginTop: '2px' }}>
+                  Mon–Sun, 5–8 PM (UTC+7)
                 </div>
               </div>
 
-              {/* Row 2: Email */}
+              {/* Timezone Converter Trigger & Interactive Dropdown */}
+              <div ref={tzDropdownRef} style={{ position: 'relative', marginTop: '12px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsTzOpen((prev) => !prev)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '7px',
+                    padding: '6px 12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(255, 255, 255, 0.14)',
+                    borderRadius: '8px',
+                    color: '#ffffff',
+                    fontSize: '12.5px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    fontFamily: "'Figtree', sans-serif",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.28)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.06)'
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.14)'
+                  }}
+                >
+                  <span
+                    style={{
+                      width: '7px',
+                      height: '7px',
+                      borderRadius: '50%',
+                      backgroundColor: activeNow ? '#22c55e' : '#eab308',
+                      boxShadow: activeNow ? '0 0 8px rgba(34, 197, 94, 0.8)' : 'none',
+                    }}
+                  />
+                  <Globe size={13} style={{ color: '#9e9ea7' }} />
+                  <span>
+                    {selectedTz.label} ({formatTime(selectedTz.zone)})
+                  </span>
+                  <ChevronDown
+                    size={13}
+                    style={{
+                      color: '#9e9ea7',
+                      transform: isTzOpen ? 'rotate(180deg)' : 'none',
+                      transition: 'transform 0.2s ease',
+                    }}
+                  />
+                </button>
+
+                {/* Interactive Timezone Popup Modal (matching screenshot) */}
+                {isTzOpen && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 'calc(100% + 8px)',
+                      left: 0,
+                      width: '320px',
+                      maxWidth: '90vw',
+                      backgroundColor: '#1b1b1e',
+                      border: '1px solid rgba(255, 255, 255, 0.14)',
+                      borderRadius: '14px',
+                      padding: '16px',
+                      boxShadow: '0 20px 45px rgba(0, 0, 0, 0.65)',
+                      zIndex: 60,
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    {/* Search Bar */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 12px',
+                        backgroundColor: '#111113',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        borderRadius: '8px',
+                        marginBottom: '14px',
+                      }}
+                    >
+                      <Search size={14} style={{ color: '#71717a' }} />
+                      <input
+                        type="text"
+                        value={tzSearch}
+                        onChange={(e) => setTzSearch(e.target.value)}
+                        placeholder="Search city or timezone..."
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          outline: 'none',
+                          color: '#ffffff',
+                          fontSize: '13px',
+                          width: '100%',
+                          fontFamily: "'Figtree', sans-serif",
+                        }}
+                      />
+                    </div>
+
+                    {/* Timezone Controls: AM/PM vs 24h Toggle */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        paddingBottom: '10px',
+                        marginBottom: '8px',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                      }}
+                    >
+                      <span style={{ fontSize: '11px', fontWeight: 800, color: '#a1a1aa', letterSpacing: '0.8px' }}>
+                        TIME ZONE
+                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '11px', color: !is24h ? '#ffffff' : '#71717a', fontWeight: !is24h ? 700 : 400 }}>
+                          am/pm
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setIs24h((prev) => !prev)}
+                          style={{
+                            width: '34px',
+                            height: '18px',
+                            backgroundColor: is24h ? '#0260ef' : '#333338',
+                            borderRadius: '20px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            padding: 0,
+                            transition: 'background-color 0.2s ease',
+                          }}
+                        >
+                          <span
+                            style={{
+                              position: 'absolute',
+                              top: '2px',
+                              left: is24h ? '18px' : '2px',
+                              width: '14px',
+                              height: '14px',
+                              backgroundColor: '#ffffff',
+                              borderRadius: '50%',
+                              transition: 'left 0.2s ease',
+                            }}
+                          />
+                        </button>
+                        <span style={{ fontSize: '11px', color: is24h ? '#ffffff' : '#71717a', fontWeight: is24h ? 700 : 400 }}>
+                          24h
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Converted Hours Banner in selected TZ */}
+                    <div
+                      style={{
+                        padding: '8px 10px',
+                        backgroundColor: 'rgba(2, 96, 239, 0.1)',
+                        border: '1px solid rgba(2, 96, 239, 0.25)',
+                        borderRadius: '8px',
+                        marginBottom: '10px',
+                        fontSize: '11.5px',
+                        color: '#93c5fd',
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, color: '#bfdbfe' }}>
+                        My 5–8 PM is in your time:
+                      </div>
+                      <div>{getConvertedWorkingHours(selectedTz.zone)}</div>
+                    </div>
+
+                    {/* Timezone List */}
+                    <div
+                      style={{
+                        maxHeight: '190px',
+                        overflowY: 'auto',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '2px',
+                      }}
+                    >
+                      {filteredTimezones.map((tz) => {
+                        const isSelected = selectedTz.id === tz.id
+                        return (
+                          <button
+                            key={tz.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedTz(tz)
+                              setIsTzOpen(false)
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '8px 10px',
+                              borderRadius: '6px',
+                              border: 'none',
+                              backgroundColor: isSelected ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                              color: isSelected ? '#ffffff' : '#d4d4d8',
+                              fontSize: '12.5px',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              width: '100%',
+                              transition: 'background-color 0.15s ease',
+                              fontFamily: "'Figtree', sans-serif",
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isSelected) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'
+                            }}
+                          >
+                            <div>
+                              <div style={{ fontWeight: isSelected ? 700 : 500 }}>{tz.label}</div>
+                              <div style={{ fontSize: '11px', color: '#71717a' }}>{tz.city}</div>
+                            </div>
+                            <span style={{ fontWeight: 700, fontSize: '13px', color: isSelected ? '#60a5fa' : '#a1a1aa' }}>
+                              {formatTime(tz.zone)}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Block 2: Chat */}
+            <div className="contact-grid-block">
+              <span
+                style={{
+                  display: 'block',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  letterSpacing: '1.2px',
+                  textTransform: 'uppercase',
+                  color: 'rgba(255, 255, 255, 0.45)',
+                  marginBottom: '10px',
+                }}
+              >
+                Chat
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14.5px' }}>
+                {/* Phone */}
+                <a
+                  href="tel:081661190"
+                  style={{
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'color 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#0260ef')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
+                >
+                  <Phone size={14} style={{ color: '#0260ef' }} />
+                  <span>081661190</span>
+                </a>
+
+                {/* Telegram */}
+                <a
+                  href="https://t.me/boayuthaya"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#f1f1f1',
+                    textDecoration: 'none',
+                    fontWeight: 500,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'color 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#229ed9')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#f1f1f1')}
+                >
+                  <MessageCircle size={14} style={{ color: '#229ed9' }} />
+                  <span>Telegram @boayuthaya</span>
+                </a>
+
+                {/* Facebook & LinkedIn */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#a0a0aa', fontSize: '13.5px', marginTop: '2px' }}>
+                  <a
+                    href="https://www.facebook.com/bo.ayuthaya/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: '#a0a0aa',
+                      textDecoration: 'none',
+                      transition: 'color 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#1877f2')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#a0a0aa')}
+                  >
+                    Facebook
+                  </a>
+                  <span>•</span>
+                  <a
+                    href="https://www.linkedin.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: '#a0a0aa',
+                      textDecoration: 'none',
+                      transition: 'color 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#0a66c2')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#a0a0aa')}
+                  >
+                    LinkedIn
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Block 3: Email */}
+            <div className="contact-grid-block">
+              <span
+                style={{
+                  display: 'block',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  letterSpacing: '1.2px',
+                  textTransform: 'uppercase',
+                  color: 'rgba(255, 255, 255, 0.45)',
+                  marginBottom: '10px',
+                }}
+              >
+                Email
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <a
+                  href="mailto:ayutiatabb@gmail.com"
+                  style={{
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    fontSize: '14.5px',
+                    fontWeight: 600,
+                    transition: 'color 0.2s ease',
+                    wordBreak: 'break-all',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#0260ef')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
+                >
+                  ayutiatabb@gmail.com
+                </a>
+                <button
+                  type="button"
+                  onClick={handleCopyEmail}
+                  title="Copy email"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: '4px',
+                    color: copiedEmail ? '#22c55e' : '#71717a',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'color 0.2s ease',
+                  }}
+                >
+                  {copiedEmail ? <Check size={14} /> : <Copy size={14} />}
+                </button>
+              </div>
+              {copiedEmail && (
+                <span style={{ fontSize: '11px', color: '#22c55e', marginTop: '4px', display: 'block', fontWeight: 600 }}>
+                  Email copied to clipboard!
+                </span>
+              )}
+            </div>
+
+            {/* Block 4: Freelance */}
+            <div className="contact-grid-block">
+              <span
+                style={{
+                  display: 'block',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  letterSpacing: '1.2px',
+                  textTransform: 'uppercase',
+                  color: 'rgba(255, 255, 255, 0.45)',
+                  marginBottom: '10px',
+                }}
+              >
+                Freelance
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14.5px' }}>
+                <a
+                  href="https://www.fiverr.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    transition: 'color 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#1dbf73')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
+                >
+                  <span>Fiverr</span>
+                  <ExternalLink size={12} style={{ color: '#71717a' }} />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ===================================================================
+            RIGHT COLUMN: Pure White Floating Card with 5 Simple Fields
+            =================================================================== */}
+        <div
+          className="contact-card-wrapper"
+          style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '24px',
+            padding: 'clamp(28px, 4vw, 44px)',
+            boxShadow: '0 25px 60px rgba(0, 0, 0, 0.5)',
+            color: '#141414',
+            position: 'relative',
+          }}
+        >
+          {/* Card Title (Subtitle removed per user request) */}
+          <div style={{ marginBottom: '24px' }}>
+            <h3
+              style={{
+                fontSize: 'clamp(24px, 2.5vw, 30px)',
+                fontWeight: 800,
+                letterSpacing: '-0.5px',
+                margin: 0,
+                color: '#141414',
+                fontFamily: "'Figtree', sans-serif",
+              }}
+            >
+              Tell Me What You Need
+            </h3>
+          </div>
+
+          {!isSubmitted ? (
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Field 1: Full Name */}
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 700, marginBottom: '8px', color: '#e6e7ed' }}>
-                  Your Email Address <span style={{ color: '#0260ef' }}>*</span>
+                <label
+                  htmlFor="cf-name"
+                  style={{
+                    display: 'block',
+                    fontSize: '13.5px',
+                    fontWeight: 700,
+                    marginBottom: '7px',
+                    color: '#0f172a',
+                  }}
+                >
+                  Full Name <span style={{ color: '#0260ef' }}>*</span>
                 </label>
                 <input
+                  id="cf-name"
+                  type="text"
+                  name="name"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="e.g. Alex Morgan"
+                  style={{
+                    width: '100%',
+                    padding: '13px 16px',
+                    backgroundColor: '#f8fafc',
+                    border: '1.5px solid #e2e8f0',
+                    borderRadius: '10px',
+                    color: '#0f172a',
+                    fontSize: '14.5px',
+                    fontFamily: "'Figtree', sans-serif",
+                    outline: 'none',
+                    transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#0260ef'
+                    e.target.style.boxShadow = '0 0 0 3px rgba(2, 96, 239, 0.12)'
+                    e.target.style.backgroundColor = '#ffffff'
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0'
+                    e.target.style.boxShadow = 'none'
+                    e.target.style.backgroundColor = '#f8fafc'
+                  }}
+                />
+              </div>
+
+              {/* Field 2: Email */}
+              <div>
+                <label
+                  htmlFor="cf-email"
+                  style={{
+                    display: 'block',
+                    fontSize: '13.5px',
+                    fontWeight: 700,
+                    marginBottom: '7px',
+                    color: '#0f172a',
+                  }}
+                >
+                  Email <span style={{ color: '#0260ef' }}>*</span>
+                </label>
+                <input
+                  id="cf-email"
                   type="email"
                   name="email"
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="e.g. john@gmail.com"
+                  placeholder="alex@example.com"
                   style={{
                     width: '100%',
-                    padding: '14px 18px',
-                    backgroundColor: '#1b1b1b',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    padding: '13px 16px',
+                    backgroundColor: '#f8fafc',
+                    border: '1.5px solid #e2e8f0',
                     borderRadius: '10px',
-                    color: '#ffffff',
-                    fontSize: '15px',
-                    outline: 'none',
+                    color: '#0f172a',
+                    fontSize: '14.5px',
                     fontFamily: "'Figtree', sans-serif",
+                    outline: 'none',
+                    transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#0260ef'
+                    e.target.style.boxShadow = '0 0 0 3px rgba(2, 96, 239, 0.12)'
+                    e.target.style.backgroundColor = '#ffffff'
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0'
+                    e.target.style.boxShadow = 'none'
+                    e.target.style.backgroundColor = '#f8fafc'
                   }}
                 />
               </div>
 
-              {/* Row 3: Platform Selector (Telegram vs Facebook vs Email) */}
+              {/* Field 3: Where should I message you? */}
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 700, marginBottom: '10px', color: '#e6e7ed' }}>
-                  Where should I contact you back? <span style={{ color: '#0260ef' }}>*</span>
+                <label
+                  htmlFor="cf-platform"
+                  style={{
+                    display: 'block',
+                    fontSize: '13.5px',
+                    fontWeight: 700,
+                    marginBottom: '7px',
+                    color: '#0f172a',
+                  }}
+                >
+                  Where should I message you? <span style={{ color: '#0260ef' }}>*</span>
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
-                  {/* Telegram Option */}
-                  <button
-                    type="button"
-                    onClick={() => handlePlatformChange('telegram')}
-                    style={{
-                      padding: '12px 14px',
-                      borderRadius: '10px',
-                      border: formData.platform === 'telegram' ? '2px solid #0260ef' : '1px solid rgba(255, 255, 255, 0.12)',
-                      backgroundColor: formData.platform === 'telegram' ? 'rgba(2, 96, 239, 0.15)' : '#1b1b1b',
-                      color: formData.platform === 'telegram' ? '#ffffff' : '#a0a5ad',
-                      fontSize: '14px',
-                      fontWeight: 700,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      fontFamily: "'Figtree', sans-serif",
-                    }}
-                  >
-                    <span>✈️ Telegram</span>
-                  </button>
-
-                  {/* Facebook Option */}
-                  <button
-                    type="button"
-                    onClick={() => handlePlatformChange('facebook')}
-                    style={{
-                      padding: '12px 14px',
-                      borderRadius: '10px',
-                      border: formData.platform === 'facebook' ? '2px solid #0260ef' : '1px solid rgba(255, 255, 255, 0.12)',
-                      backgroundColor: formData.platform === 'facebook' ? 'rgba(2, 96, 239, 0.15)' : '#1b1b1b',
-                      color: formData.platform === 'facebook' ? '#ffffff' : '#a0a5ad',
-                      fontSize: '14px',
-                      fontWeight: 700,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      fontFamily: "'Figtree', sans-serif",
-                    }}
-                  >
-                    <span>📘 Facebook</span>
-                  </button>
-
-                  {/* Email Option */}
-                  <button
-                    type="button"
-                    onClick={() => handlePlatformChange('email')}
-                    style={{
-                      padding: '12px 14px',
-                      borderRadius: '10px',
-                      border: formData.platform === 'email' ? '2px solid #0260ef' : '1px solid rgba(255, 255, 255, 0.12)',
-                      backgroundColor: formData.platform === 'email' ? 'rgba(2, 96, 239, 0.15)' : '#1b1b1b',
-                      color: formData.platform === 'email' ? '#ffffff' : '#a0a5ad',
-                      fontSize: '14px',
-                      fontWeight: 700,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      fontFamily: "'Figtree', sans-serif",
-                    }}
-                  >
-                    <span>✉️ Email</span>
-                  </button>
-                </div>
+                <select
+                  id="cf-platform"
+                  name="platform"
+                  value={formData.platform}
+                  onChange={handleChange}
+                  style={{
+                    width: '100%',
+                    padding: '13px 16px',
+                    backgroundColor: '#f8fafc',
+                    border: '1.5px solid #e2e8f0',
+                    borderRadius: '10px',
+                    color: '#0f172a',
+                    fontSize: '14.5px',
+                    fontWeight: 600,
+                    fontFamily: "'Figtree', sans-serif",
+                    outline: 'none',
+                    cursor: 'pointer',
+                    boxSizing: 'border-box',
+                    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#0260ef'
+                    e.target.style.boxShadow = '0 0 0 3px rgba(2, 96, 239, 0.12)'
+                    e.target.style.backgroundColor = '#ffffff'
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0'
+                    e.target.style.boxShadow = 'none'
+                    e.target.style.backgroundColor = '#f8fafc'
+                  }}
+                >
+                  <option value="Telegram">Telegram</option>
+                  <option value="Facebook">Facebook</option>
+                  <option value="LinkedIn">LinkedIn</option>
+                </select>
               </div>
 
-              {/* Row 4: Handle / Username based on chosen platform */}
+              {/* Field 4: Username or Number on that app */}
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 700, marginBottom: '8px', color: '#e6e7ed' }}>
-                  {formData.platform === 'telegram'
-                    ? 'Your Telegram @username'
-                    : formData.platform === 'facebook'
-                    ? 'Your Facebook Profile Link'
-                    : 'Preferred Email for replies'}
-                  <span style={{ color: '#0260ef' }}> *</span>
+                <label
+                  htmlFor="cf-handle"
+                  style={{
+                    display: 'block',
+                    fontSize: '13.5px',
+                    fontWeight: 700,
+                    marginBottom: '7px',
+                    color: '#0f172a',
+                  }}
+                >
+                  Your username or number on {formData.platform} <span style={{ color: '#0260ef' }}>*</span>
                 </label>
                 <input
+                  id="cf-handle"
                   type="text"
                   name="handle"
                   required
                   value={formData.handle}
                   onChange={handleChange}
-                  placeholder={
-                    formData.platform === 'telegram'
-                      ? 'e.g. @john_creator'
-                      : formData.platform === 'facebook'
-                      ? 'e.g. facebook.com/john.creator'
-                      : 'e.g. john@gmail.com'
-                  }
+                  placeholder={getHandlePlaceholder(formData.platform)}
                   style={{
                     width: '100%',
-                    padding: '14px 18px',
-                    backgroundColor: '#1b1b1b',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    padding: '13px 16px',
+                    backgroundColor: '#f8fafc',
+                    border: '1.5px solid #e2e8f0',
                     borderRadius: '10px',
-                    color: '#ffffff',
-                    fontSize: '15px',
-                    outline: 'none',
+                    color: '#0f172a',
+                    fontSize: '14.5px',
                     fontFamily: "'Figtree', sans-serif",
+                    outline: 'none',
+                    transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#0260ef'
+                    e.target.style.boxShadow = '0 0 0 3px rgba(2, 96, 239, 0.12)'
+                    e.target.style.backgroundColor = '#ffffff'
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0'
+                    e.target.style.boxShadow = 'none'
+                    e.target.style.backgroundColor = '#f8fafc'
                   }}
                 />
               </div>
 
-              {/* Row 5: Video Topic / Notes */}
+              {/* Field 5: What do you need? */}
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 700, marginBottom: '8px', color: '#e6e7ed' }}>
-                  Video Topic or Thumbnail Idea
+                <label
+                  htmlFor="cf-details"
+                  style={{
+                    display: 'block',
+                    fontSize: '13.5px',
+                    fontWeight: 700,
+                    marginBottom: '7px',
+                    color: '#0f172a',
+                  }}
+                >
+                  What do you need? <span style={{ color: '#0260ef' }}>*</span>
                 </label>
                 <textarea
-                  name="message"
+                  id="cf-details"
+                  name="details"
                   rows={4}
-                  value={formData.message}
+                  required
+                  value={formData.details}
                   onChange={handleChange}
-                  placeholder="e.g. I built a business with $500 - looking for a high-contrast style with bold face cutout..."
+                  placeholder="Share your video link or topic, thumbnail style you like, and your deadline..."
                   style={{
                     width: '100%',
-                    padding: '14px 18px',
-                    backgroundColor: '#1b1b1b',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    padding: '13px 16px',
+                    backgroundColor: '#f8fafc',
+                    border: '1.5px solid #e2e8f0',
                     borderRadius: '10px',
-                    color: '#ffffff',
-                    fontSize: '15px',
-                    outline: 'none',
+                    color: '#0f172a',
+                    fontSize: '14.5px',
                     fontFamily: "'Figtree', sans-serif",
+                    outline: 'none',
                     resize: 'vertical',
                     lineHeight: 1.5,
+                    transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#0260ef'
+                    e.target.style.boxShadow = '0 0 0 3px rgba(2, 96, 239, 0.12)'
+                    e.target.style.backgroundColor = '#ffffff'
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0'
+                    e.target.style.boxShadow = 'none'
+                    e.target.style.backgroundColor = '#f8fafc'
                   }}
                 />
               </div>
+
+              {/* Error Alert */}
+              {errorMessage && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '12px 14px',
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid #fecaca',
+                    borderRadius: '8px',
+                    color: '#b91c1c',
+                    fontSize: '13.5px',
+                    fontWeight: 600,
+                  }}
+                >
+                  <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
 
               {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
+                className="contact-submit-btn"
                 style={{
+                  width: '100%',
                   padding: '16px 28px',
-                  backgroundColor: '#0260ef',
+                  backgroundColor: '#141414',
                   color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '10px',
-                  fontSize: '16px',
+                  border: '1.5px solid #141414',
+                  borderRadius: '12px',
+                  fontSize: '15.5px',
                   fontWeight: 800,
+                  letterSpacing: '0.4px',
                   cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '10px',
-                  transition: 'background-color 0.2s ease, transform 0.15s ease',
+                  gap: '8px',
+                  transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                   fontFamily: "'Figtree', sans-serif",
-                  boxShadow: '0 4px 15px rgba(2, 96, 239, 0.35)',
+                  marginTop: '6px',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.12)',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#024fc5')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0260ef')}
+                onMouseEnter={(e) => {
+                  if (!isSubmitting) {
+                    e.currentTarget.style.backgroundColor = '#0260ef'
+                    e.currentTarget.style.borderColor = '#0260ef'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(2, 96, 239, 0.35)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSubmitting) {
+                    e.currentTarget.style.backgroundColor = '#141414'
+                    e.currentTarget.style.borderColor = '#141414'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.12)'
+                  }
+                }}
               >
-                <span>{isSubmitting ? 'Sending...' : 'SEND REQUEST'}</span>
+                <span>{isSubmitting ? 'SENDING REQUEST...' : 'SUBMIT REQUEST'}</span>
+                {!isSubmitting && <Send size={15} />}
               </button>
             </form>
           ) : (
-            /* Success Confirmation State */
-            <div style={{ textAlign: 'center', padding: '30px 10px' }}>
+            /* Success State */
+            <div style={{ textAlign: 'center', padding: '36px 12px' }}>
               <div
                 style={{
                   width: '64px',
                   height: '64px',
-                  backgroundColor: 'rgba(2, 96, 239, 0.15)',
+                  backgroundColor: 'rgba(2, 96, 239, 0.1)',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
@@ -404,311 +1112,46 @@ export default function ContactSection() {
                 <CheckCircle2 size={36} />
               </div>
 
-              <h3 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '12px', color: '#ffffff' }}>
+              <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '10px', color: '#0f172a' }}>
                 Request Sent Successfully!
               </h3>
 
-              <p style={{ fontSize: '16px', color: '#a0a5ad', maxWidth: '480px', margin: '0 auto 28px', lineHeight: 1.6 }}>
-                Thanks <strong style={{ color: '#ffffff' }}>{formData.name}</strong>! I received your details and will reach out via{' '}
-                <strong style={{ color: '#0260ef', textTransform: 'capitalize' }}>{formData.platform}</strong> ({formData.handle}) shortly.
+              <p
+                style={{
+                  fontSize: '14.5px',
+                  color: '#64748b',
+                  maxWidth: '420px',
+                  margin: '0 auto 24px',
+                  lineHeight: 1.6,
+                }}
+              >
+                Thanks <strong style={{ color: '#0f172a' }}>{formData.name}</strong>! I received your details in my
+                inbox and will reach out on <strong style={{ color: '#0260ef' }}>{formData.platform}</strong> ({formData.handle})
+                shortly.
               </p>
 
-              {/* Immediate Chat Shortcut */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '14px' }}>
-                {formData.platform === 'telegram' ? (
-                  <a
-                    href={CONTACT_CONTENT.channels.telegram.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      padding: '12px 24px',
-                      backgroundColor: '#0260ef',
-                      color: '#ffffff',
-                      borderRadius: '8px',
-                      fontSize: '15px',
-                      fontWeight: 700,
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                    }}
-                  >
-                    <span>Open Telegram Chat with Ayuthaya</span>
-                    <ExternalLink size={16} />
-                  </a>
-                ) : formData.platform === 'facebook' ? (
-                  <a
-                    href={CONTACT_CONTENT.channels.facebook.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      padding: '12px 24px',
-                      backgroundColor: '#0260ef',
-                      color: '#ffffff',
-                      borderRadius: '8px',
-                      fontSize: '15px',
-                      fontWeight: 700,
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                    }}
-                  >
-                    <span>Open Facebook Profile</span>
-                    <ExternalLink size={16} />
-                  </a>
-                ) : null}
-
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  style={{
-                    padding: '12px 20px',
-                    backgroundColor: 'transparent',
-                    color: '#a0a5ad',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Send Another Request
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleReset}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: '#141414',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  fontFamily: "'Figtree', sans-serif",
+                  transition: 'background-color 0.2s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0260ef')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#141414')}
+              >
+                Send Another Request
+              </button>
             </div>
           )}
-        </div>
-
-        {/* ==========================================================================
-            DIRECT CONTACT SECTION: TELEGRAM, FACEBOOK, EMAIL, FIVERR
-            ========================================================================== */}
-        <div style={{ textAlign: 'center', marginTop: '50px' }}>
-          <h3 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '28px', color: '#ffffff' }}>
-            Prefer to reach me directly?
-          </h3>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-              gap: '16px',
-            }}
-          >
-            {/* Telegram Direct Card */}
-            <a
-              href={CONTACT_CONTENT.channels.telegram.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                backgroundColor: '#1b1b1b',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                borderRadius: '14px',
-                padding: '20px',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-                transition: 'all 0.25s ease',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#0260ef'
-                e.currentTarget.style.transform = 'translateY(-3px)'
-                e.currentTarget.style.boxShadow = '0 10px 25px rgba(2, 96, 239, 0.2)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = 'none'
-              }}
-            >
-              <div
-                style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '12px',
-                  backgroundColor: 'rgba(2, 96, 239, 0.15)',
-                  color: '#0260ef',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '22px',
-                  flexShrink: 0,
-                }}
-              >
-                ✈️
-              </div>
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ color: '#ffffff', fontSize: '16px', fontWeight: 800 }}>Telegram</div>
-                <div style={{ color: '#0260ef', fontSize: '14px', fontWeight: 600 }}>{CONTACT_CONTENT.channels.telegram.handle}</div>
-                <div style={{ color: '#8e949e', fontSize: '12px' }}>{CONTACT_CONTENT.channels.telegram.desc}</div>
-              </div>
-            </a>
-
-            {/* Facebook Direct Card */}
-            <a
-              href={CONTACT_CONTENT.channels.facebook.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                backgroundColor: '#1b1b1b',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                borderRadius: '14px',
-                padding: '20px',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-                transition: 'all 0.25s ease',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#0260ef'
-                e.currentTarget.style.transform = 'translateY(-3px)'
-                e.currentTarget.style.boxShadow = '0 10px 25px rgba(2, 96, 239, 0.2)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = 'none'
-              }}
-            >
-              <div
-                style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '12px',
-                  backgroundColor: 'rgba(24, 119, 242, 0.15)',
-                  color: '#1877f2',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '22px',
-                  flexShrink: 0,
-                }}
-              >
-                📘
-              </div>
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ color: '#ffffff', fontSize: '16px', fontWeight: 800 }}>Facebook</div>
-                <div style={{ color: '#1877f2', fontSize: '14px', fontWeight: 600 }}>{CONTACT_CONTENT.channels.facebook.handle}</div>
-                <div style={{ color: '#8e949e', fontSize: '12px' }}>{CONTACT_CONTENT.channels.facebook.desc}</div>
-              </div>
-            </a>
-
-            {/* Email Direct Card */}
-            <a
-              href={CONTACT_CONTENT.channels.email.url}
-              style={{
-                backgroundColor: '#1b1b1b',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                borderRadius: '14px',
-                padding: '20px',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-                transition: 'all 0.25s ease',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#0260ef'
-                e.currentTarget.style.transform = 'translateY(-3px)'
-                e.currentTarget.style.boxShadow = '0 10px 25px rgba(2, 96, 239, 0.2)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = 'none'
-              }}
-            >
-              <div
-                style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '12px',
-                  backgroundColor: 'rgba(255, 122, 0, 0.15)',
-                  color: '#ff7a00',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '20px',
-                  flexShrink: 0,
-                }}
-              >
-                ✉️
-              </div>
-              <div style={{ textAlign: 'left', overflow: 'hidden' }}>
-                <div style={{ color: '#ffffff', fontSize: '16px', fontWeight: 800 }}>Email</div>
-                <div
-                  style={{
-                    color: '#ff7a00',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    textOverflow: 'ellipsis',
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {CONTACT_CONTENT.channels.email.address}
-                </div>
-                <div style={{ color: '#8e949e', fontSize: '12px' }}>{CONTACT_CONTENT.channels.email.desc}</div>
-              </div>
-            </a>
-
-            {/* Fiverr Order Card */}
-            <a
-              href={CONTACT_CONTENT.channels.fiverr.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                backgroundColor: '#1b1b1b',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                borderRadius: '14px',
-                padding: '20px',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-                transition: 'all 0.25s ease',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#1dbf73'
-                e.currentTarget.style.transform = 'translateY(-3px)'
-                e.currentTarget.style.boxShadow = '0 10px 25px rgba(29, 191, 115, 0.2)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = 'none'
-              }}
-            >
-              <div
-                style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '12px',
-                  backgroundColor: 'rgba(29, 191, 115, 0.15)',
-                  color: '#1dbf73',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '20px',
-                  flexShrink: 0,
-                  fontWeight: 900,
-                }}
-              >
-                fi
-              </div>
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ color: '#ffffff', fontSize: '16px', fontWeight: 800 }}>Fiverr</div>
-                <div style={{ color: '#1dbf73', fontSize: '14px', fontWeight: 600 }}>Order on Fiverr</div>
-                <div style={{ color: '#8e949e', fontSize: '12px' }}>{CONTACT_CONTENT.channels.fiverr.desc}</div>
-              </div>
-            </a>
-          </div>
         </div>
       </div>
     </section>
