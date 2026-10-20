@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CheckCircle2, AlertCircle, Send } from 'lucide-react'
+import { CheckCircle2, AlertCircle } from 'lucide-react'
 import { CONTACT_CONTENT } from '#constants'
 
 // =========================================================================
@@ -9,12 +9,12 @@ const CONTACT_BLOCKS = {
   // Block 1
   availabilityTitle: 'Availability', // <-- EDIT TITLE 1 HERE (e.g. 'Availability' or 'Location')
   country: 'Cambodia',
-  hours: 'Mon–Sun, 5–8 PM (UTC+7)',
+  hours: 'Monday–Sunday, 5–8 PM (UTC+7)',
 
   // Block 2
   chatTitle: 'Social Media', // <-- EDIT TITLE 2 HERE (e.g. 'Social Media' or 'Chat')
   socials: [
-    { label: 'Telegram @boayuthaya', url: 'https://t.me/boayuthaya' },
+    { label: 'Telegram', url: 'https://t.me/boayuthaya' },
     { label: 'Facebook', url: 'https://www.facebook.com/bo.ayuthaya/' },
     { label: 'LinkedIn', url: 'https://www.linkedin.com' },
     { label: '081661190', url: 'tel:081661190' },
@@ -735,8 +735,7 @@ export default function ContactSection() {
                   }
                 }}
               >
-                <span>{isSubmitting ? 'SENDING REQUEST...' : 'SUBMIT REQUEST'}</span>
-                {!isSubmitting && <Send size={15} />}
+                <span>{isSubmitting ? 'Submitting...' : 'Submit'}</span>
               </button>
             </form>
           ) : (
