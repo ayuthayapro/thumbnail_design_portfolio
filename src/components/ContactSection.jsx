@@ -16,7 +16,7 @@ const CONTACT_BLOCKS = {
   socials: [
     { label: 'Telegram', url: 'https://t.me/boayuthaya' },
     { label: 'Facebook', url: 'https://www.facebook.com/bo.ayuthaya/' },
-    { label: 'LinkedIn', url: 'https://www.linkedin.com' },
+    { label: 'LinkedIn', url: 'https://www.linkedin.com/in/ayutia-tabb-a1930a406/' },
     { label: '081661190', url: 'tel:081661190' },
   ],
 
