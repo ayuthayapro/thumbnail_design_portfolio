@@ -156,6 +156,14 @@ export default function Hero() {
                   objectFit: 'cover',
                   maxWidth: '430px',
                   display: 'inline-block',
+
+                  // ==========================================================
+                  // 📍 EDIT PHOTO FRAME POSITION HERE:
+                  // ==========================================================
+                  // transform: 'translate(X, Y)'
+                  // • 1st value (X): Positive (+) moves RIGHT, Negative (-) moves LEFT
+                  // • 2nd value (Y): Positive (+) moves DOWN, Negative (-) moves UP
+                  transform: 'translate(200px, 0px)', // <-- EDIT HERE (e.g. 'translate(40px, -20px)')
                 }}
               />
             </div>

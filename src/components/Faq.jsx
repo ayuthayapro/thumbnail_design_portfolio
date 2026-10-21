@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { FAQ_ITEMS } from '../constants'
 
 export default function Faq() {
-  // First item open by default matching Photo 1 ("Do you have a YouTube channel?")
-  const [openId, setOpenId] = useState('faq-3')
+  // All accordion items start closed by default
+  const [openId, setOpenId] = useState(null)
 
   const toggleItem = (id) => {
     setOpenId((prev) => (prev === id ? null : id))

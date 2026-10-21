@@ -5,9 +5,8 @@ const NAV_ITEMS = [
   { label: 'About me', href: '#about-me' },
   { label: 'The process', href: '#theprocess' },
   { label: 'Latest thumbnails', href: '#latest-thumbnails' },
-  { label: 'Testimonials', href: '#testimonial' },
+  { label: 'Client', href: '#client' },
   { label: 'FAQ', href: '#FAQ' },
-  { label: 'Thumbnail Collection', href: '#latest-thumbnails' },
   { label: "Let's talk!", href: '#contact' },
 ]
 
