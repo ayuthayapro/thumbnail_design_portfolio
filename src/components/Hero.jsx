@@ -156,6 +156,10 @@ export default function Hero() {
                   objectFit: 'cover',
                   maxWidth: '430px',
                   display: 'inline-block',
+
+                  
+
+
                 }}
               />
             </div>
