@@ -118,6 +118,7 @@ export default function Navbar() {
             data-element_type="widget"
             data-e-type="widget"
             data-widget_type="image.default"
+            style={{ visibility: 'hidden', pointerEvents: 'none' }}
           >
             <div className="elementor-widget-container">
               <img
@@ -160,7 +161,7 @@ export default function Navbar() {
                     decoding="async"
                     src="/images/Watermark.png"
                     alt="Logo"
-                    style={{ width: '60px', height: '60px', marginBottom: '20px' }}
+                    style={{ display: 'none' }}
                   />
                   <a
                     href="#"
@@ -273,6 +274,7 @@ export default function Navbar() {
             data-element_type="widget"
             data-e-type="widget"
             data-widget_type="site-logo.default"
+            style={{ visibility: 'hidden', pointerEvents: 'none' }}
           >
             <div className="elementor-widget-container">
               <div className="hfe-site-logo">
