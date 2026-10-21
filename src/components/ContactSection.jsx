@@ -164,9 +164,9 @@ export default function ContactSection() {
       case 'Telegram':
         return '@yourusername or phone number'
       case 'Facebook':
-        return 'Profile link or full name'
+        return 'Profile link'
       case 'LinkedIn':
-        return 'Profile link or full name'
+        return 'Profile link'
       default:
         return 'Your username or link'
     }
@@ -652,7 +652,7 @@ export default function ContactSection() {
                     color: '#0f172a',
                   }}
                 >
-                  Your username or number on {formData.platform} <span style={{ color: '#0260ef' }}>*</span>
+                  Your username and number on {formData.platform} <span style={{ color: '#0260ef' }}>*</span>
                 </label>
                 <input
                   id="cf-handle"
