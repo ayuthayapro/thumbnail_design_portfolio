@@ -134,6 +134,12 @@ export default function Hero() {
           data-element_type="container"
           data-e-type="container"
           data-settings='{"animation":"fadeInRight"}'
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            paddingRight: 'clamp(20px, 5vw, 90px)',
+          }}
         >
           <div
             className="elementor-element elementor-element-3f011df7 elementor-widget elementor-widget-image"
@@ -141,6 +147,11 @@ export default function Hero() {
             data-element_type="widget"
             data-e-type="widget"
             data-widget_type="image.default"
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              width: '100%',
+            }}
           >
             <div className="elementor-widget-container">
               <img

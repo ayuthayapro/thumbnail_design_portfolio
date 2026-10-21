@@ -84,6 +84,7 @@ export default function Navbar() {
         data-element_type="container"
         data-e-type="container"
         data-settings='{"background_background":"classic","position_offset":0,"position_offset_widescreen":0,"position_offset_laptop":0,"position_offset_tablet_extra":0,"position_offset_tablet":0,"position_offset_mobile":0}'
+        style={{ minHeight: '70px', alignItems: 'center' }}
       >
         <div
           className="elementor-element elementor-element-5236f1ba e-con-full e-flex wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no wpr-column-slider-no wpr-equal-height-no e-con e-child"
@@ -232,7 +233,18 @@ export default function Navbar() {
         data-e-type="container"
         id="menu"
         data-settings='{"background_background":"classic","animation":"fadeInDown","position_offset":0,"position_offset_widescreen":0,"position_offset_laptop":0,"position_offset_tablet_extra":0,"position_offset_tablet":0,"position_offset_mobile":0}'
-        style={{ position: 'fixed', top: 0, left: 0, width: '100%' }}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          minHeight: '85px',
+          height: '85px',
+          display: 'flex',
+          alignItems: 'center',
+          boxSizing: 'border-box',
+          padding: '0 20px',
+        }}
       >
         <div
           className="elementor-element elementor-element-37d6590b e-con-full e-flex wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no wpr-column-slider-no wpr-equal-height-no e-con e-child"
@@ -240,6 +252,7 @@ export default function Navbar() {
           data-element_type="container"
           data-e-type="container"
           aria-hidden="true"
+          style={{ width: '120px', minHeight: '60px' }}
         />
 
         <div
@@ -247,6 +260,12 @@ export default function Navbar() {
           data-id="78bb64b9"
           data-element_type="container"
           data-e-type="container"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            height: '100%',
+          }}
         >
           <div
             className="elementor-element elementor-element-4bdd4a80 elementor-widget__width-auto elementor-widget elementor-widget-html"
