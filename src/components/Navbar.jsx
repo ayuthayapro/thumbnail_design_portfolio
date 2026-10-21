@@ -111,29 +111,8 @@ export default function Navbar() {
           data-id="304c3b38"
           data-element_type="container"
           data-e-type="container"
-        >
-          <div
-            className="elementor-element elementor-element-46defb elementor-widget elementor-widget-image"
-            data-id="46defb"
-            data-element_type="widget"
-            data-e-type="widget"
-            data-widget_type="image.default"
-          >
-            <div className="elementor-widget-container">
-              <img
-                fetchPriority="high"
-                decoding="async"
-                width="800"
-                height="800"
-                src="/images/Watermark.png"
-                className="attachment-large size-large wp-image-1378"
-                alt="Menno Visser Media"
-                srcSet="/images/Watermark.png 800w, /images/Watermark-300x300.png 300w, /images/Watermark-150x150.png 150w, /images/Watermark-768x768.png 768w"
-                sizes="(max-width: 800px) 100vw, 800px"
-              />
-            </div>
-          </div>
-        </div>
+          aria-hidden="true"
+        />
 
         <div
           className="elementor-element elementor-element-531ec36b e-con-full e-flex wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no wpr-column-slider-no wpr-equal-height-no e-con e-child"
@@ -155,17 +134,11 @@ export default function Navbar() {
                 </a>
               </div>
               <div id="mobiel-menu">
-                <div style={{ position: 'relative', padding: '0px', textAlign: 'center' }}>
-                  <img
-                    decoding="async"
-                    src="/images/Watermark.png"
-                    alt="Logo"
-                    style={{ width: '60px', height: '60px', marginBottom: '20px' }}
-                  />
+                <div style={{ position: 'relative', padding: '20px', textAlign: 'right' }}>
                   <a
                     href="#"
                     id="close-menu"
-                    style={{ position: 'absolute', top: '20px', right: '20px', color: 'white' }}
+                    style={{ color: 'white', textDecoration: 'none', fontSize: '16px' }}
                   >
                     Close
                   </a>
@@ -266,32 +239,8 @@ export default function Navbar() {
           data-id="37d6590b"
           data-element_type="container"
           data-e-type="container"
-        >
-          <div
-            className="elementor-element elementor-element-3cd9e8a3 elementor-widget elementor-widget-site-logo"
-            data-id="3cd9e8a3"
-            data-element_type="widget"
-            data-e-type="widget"
-            data-widget_type="site-logo.default"
-          >
-            <div className="elementor-widget-container">
-              <div className="hfe-site-logo">
-                <a className="elementor-clickable" href="/">
-                  <div className="hfe-site-logo-set">
-                    <div className="hfe-site-logo-container">
-                      <img
-                        decoding="async"
-                        className="hfe-site-logo-img elementor-animation-"
-                        src="/images/Watermark-qo926l5kswtjswud1960onx1b3itqdu1khebwbw7ko.png"
-                        alt="Watermark.png"
-                      />
-                    </div>
-                  </div>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
+          aria-hidden="true"
+        />
 
         <div
           className="elementor-element elementor-element-78bb64b9 e-con-full e-flex wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no wpr-column-slider-no wpr-equal-height-no e-con e-child"
