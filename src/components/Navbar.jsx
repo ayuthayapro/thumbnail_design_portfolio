@@ -84,7 +84,6 @@ export default function Navbar() {
         data-element_type="container"
         data-e-type="container"
         data-settings='{"background_background":"classic","position_offset":0,"position_offset_widescreen":0,"position_offset_laptop":0,"position_offset_tablet_extra":0,"position_offset_tablet":0,"position_offset_mobile":0}'
-        style={{ minHeight: '70px', alignItems: 'center' }}
       >
         <div
           className="elementor-element elementor-element-5236f1ba e-con-full e-flex wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no wpr-column-slider-no wpr-equal-height-no e-con e-child"
@@ -112,8 +111,29 @@ export default function Navbar() {
           data-id="304c3b38"
           data-element_type="container"
           data-e-type="container"
-          aria-hidden="true"
-        />
+        >
+          <div
+            className="elementor-element elementor-element-46defb elementor-widget elementor-widget-image"
+            data-id="46defb"
+            data-element_type="widget"
+            data-e-type="widget"
+            data-widget_type="image.default"
+          >
+            <div className="elementor-widget-container">
+              <img
+                fetchPriority="high"
+                decoding="async"
+                width="800"
+                height="800"
+                src="/images/Watermark.png"
+                className="attachment-large size-large wp-image-1378"
+                alt="Menno Visser Media"
+                srcSet="/images/Watermark.png 800w, /images/Watermark-300x300.png 300w, /images/Watermark-150x150.png 150w, /images/Watermark-768x768.png 768w"
+                sizes="(max-width: 800px) 100vw, 800px"
+              />
+            </div>
+          </div>
+        </div>
 
         <div
           className="elementor-element elementor-element-531ec36b e-con-full e-flex wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no wpr-column-slider-no wpr-equal-height-no e-con e-child"
@@ -135,11 +155,17 @@ export default function Navbar() {
                 </a>
               </div>
               <div id="mobiel-menu">
-                <div style={{ position: 'relative', padding: '20px', textAlign: 'right' }}>
+                <div style={{ position: 'relative', padding: '0px', textAlign: 'center' }}>
+                  <img
+                    decoding="async"
+                    src="/images/Watermark.png"
+                    alt="Logo"
+                    style={{ width: '60px', height: '60px', marginBottom: '20px' }}
+                  />
                   <a
                     href="#"
                     id="close-menu"
-                    style={{ color: 'white', textDecoration: 'none', fontSize: '16px' }}
+                    style={{ position: 'absolute', top: '20px', right: '20px', color: 'white' }}
                   >
                     Close
                   </a>
@@ -233,39 +259,45 @@ export default function Navbar() {
         data-e-type="container"
         id="menu"
         data-settings='{"background_background":"classic","animation":"fadeInDown","position_offset":0,"position_offset_widescreen":0,"position_offset_laptop":0,"position_offset_tablet_extra":0,"position_offset_tablet":0,"position_offset_mobile":0}'
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          minHeight: '85px',
-          height: '85px',
-          display: 'flex',
-          alignItems: 'center',
-          boxSizing: 'border-box',
-          padding: '0 20px',
-        }}
+        style={{ position: 'fixed', top: 0, left: 0, width: '100%' }}
       >
         <div
           className="elementor-element elementor-element-37d6590b e-con-full e-flex wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no wpr-column-slider-no wpr-equal-height-no e-con e-child"
           data-id="37d6590b"
           data-element_type="container"
           data-e-type="container"
-          aria-hidden="true"
-          style={{ width: '120px', minHeight: '60px' }}
-        />
+        >
+          <div
+            className="elementor-element elementor-element-3cd9e8a3 elementor-widget elementor-widget-site-logo"
+            data-id="3cd9e8a3"
+            data-element_type="widget"
+            data-e-type="widget"
+            data-widget_type="site-logo.default"
+          >
+            <div className="elementor-widget-container">
+              <div className="hfe-site-logo">
+                <a className="elementor-clickable" href="/">
+                  <div className="hfe-site-logo-set">
+                    <div className="hfe-site-logo-container">
+                      <img
+                        decoding="async"
+                        className="hfe-site-logo-img elementor-animation-"
+                        src="/images/Watermark-qo926l5kswtjswud1960onx1b3itqdu1khebwbw7ko.png"
+                        alt="Watermark.png"
+                      />
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div
           className="elementor-element elementor-element-78bb64b9 e-con-full e-flex wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no wpr-column-slider-no wpr-equal-height-no e-con e-child"
           data-id="78bb64b9"
           data-element_type="container"
           data-e-type="container"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            height: '100%',
-          }}
         >
           <div
             className="elementor-element elementor-element-4bdd4a80 elementor-widget__width-auto elementor-widget elementor-widget-html"
