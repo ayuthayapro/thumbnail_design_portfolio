@@ -1,4 +1,4 @@
-﻿// Centralized data constants for the entire Bo Ayuthaya portfolio
+// Centralized data constants for the entire Bo Ayuthaya portfolio
 // Rule: Never hardcode text or static data inside UI components
 
 export const THUMBNAILS_DATA = [
@@ -6,6 +6,7 @@ export const THUMBNAILS_DATA = [
   { id: "thumb-2", image: "/thumbnail/snowForestDesert.jpg", title: "survival three nature" },
   { id: "thumb-3", image: "/thumbnail/gloomEat.jpg", title: "" },
   { id: "thumb-4", image: "/thumbnail/orstich.jpg", title: "" },
+  { id: "thumb-5", image: "/thumbnail/demandSupply.jpg", title: "Demand Supply 2%" },
 ]
 
 export const CLIENT_DATA = [
