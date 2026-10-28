@@ -2,13 +2,20 @@
 // Rule: Never hardcode text or static data inside UI components
 
 export const THUMBNAILS_DATA = [
-  { id: "thumb-1", image: "/thumbnail/MartEat.jpg", title: "100days in mart" },
-  { id: "thumb-2", image: "/thumbnail/snowForestDesert.jpg", title: "survival three nature" },
-  { id: "thumb-3", image: "/thumbnail/gloomEat.jpg", title: "" },
-  { id: "thumb-4", image: "/thumbnail/orstich.jpg", title: "" },
-  { id: "thumb-5", image: "/thumbnail/demandSupply.jpg", title: "Demand Supply 2%" },
+  // 1. My Face
+  { id: "thumb-1", image: "/thumbnail/ranked.jpg", title: "Ranked" },
+  { id: "thumb-2", image: "/thumbnail/rankLive.jpg", title: "Rank Live" },
+  { id: "thumb-3", image: "/thumbnail/demandSupply.jpg", title: "Demand Supply 2%" },
+  { id: "thumb-4", image: "/thumbnail/MartEat.jpg", title: "100days in mart" },
+  { id: "thumb-5", image: "/thumbnail/snowForestDesert.jpg", title: "survival three nature" },
+
+  // 2. Faceless
   { id: "thumb-6", image: "/thumbnail/noMoneyNoWorry.jpg", title: "No Money No Worry" },
-  { id: "thumb-7", image: "/thumbnail/rankLive.jpg", title: "Rank Live" },
+  { id: "thumb-7", image: "/thumbnail/gloomEat.jpg", title: "Food Feast" },
+
+  // 3. Roblox
+  { id: "thumb-8", image: "/thumbnail/wrongWayRoblox.jpg", title: "Wrong Way! Roblox" },
+  { id: "thumb-9", image: "/thumbnail/orstich.jpg", title: "Racing with Rainbow Ostrich" },
 ]
 
 export const CLIENT_DATA = [
