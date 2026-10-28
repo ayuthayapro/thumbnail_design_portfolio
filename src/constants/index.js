@@ -7,6 +7,8 @@ export const THUMBNAILS_DATA = [
   { id: "thumb-3", image: "/thumbnail/gloomEat.jpg", title: "" },
   { id: "thumb-4", image: "/thumbnail/orstich.jpg", title: "" },
   { id: "thumb-5", image: "/thumbnail/demandSupply.jpg", title: "Demand Supply 2%" },
+  { id: "thumb-6", image: "/thumbnail/noMoneyNoWorry.jpg", title: "No Money No Worry" },
+  { id: "thumb-7", image: "/thumbnail/rankLive.jpg", title: "Rank Live" },
 ]
 
 export const CLIENT_DATA = [
