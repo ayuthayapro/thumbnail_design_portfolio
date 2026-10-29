@@ -14,8 +14,9 @@ export const THUMBNAILS_DATA = [
   { id: "thumb-7", image: "/thumbnail/gloomEat.jpg", title: "Food Feast" },
 
   // 3. Roblox
-  { id: "thumb-8", image: "/thumbnail/wrongWayRoblox.jpg", title: "Wrong Way! Roblox" },
-  { id: "thumb-9", image: "/thumbnail/orstich.jpg", title: "Racing with Rainbow Ostrich" },
+  { id: "thumb-8", image: "/thumbnail/FunnyTreadmill.jpg", title: "Guardian Treadmill Roblox" },
+  { id: "thumb-9", image: "/thumbnail/wrongWayRoblox.jpg", title: "Wrong Way! Roblox" },
+  { id: "thumb-10", image: "/thumbnail/orstich.jpg", title: "Racing with Rainbow Ostrich" },
 ]
 
 export const CLIENT_DATA = [
